@@ -10,7 +10,6 @@
 
 extern int yyparse (void*);
 extern FILE* yyin;
-extern std::deque<std::string > qq;
 
 int main(int argc, char* argv[])
 {
@@ -28,8 +27,6 @@ int main(int argc, char* argv[])
     std::cerr << "yyparse() == " << ret << std::endl;
     if (ret == 1) {
 	std::cerr << "chyba pri parsovani vstupu" << std::endl;
-	std::copy(qq.begin(),qq.end(),
-		  std::ostream_iterator<std::string >(std::cout," => "));
 	exit(EXIT_FAILURE);
     }
 

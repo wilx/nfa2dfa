@@ -1,19 +1,10 @@
 %{
 #include "nfa.hxx"
 #include <iostream>
-#include <deque>
 
 #define YYPARSE_PARAM ptr 
 #define YYERROR_VERBOSE 1
 #define YYDEBUG 1
-
-std::deque<std::string > qq;
-
-#ifdef YYDEBUG
-# define DBG(x) { qq.push_back(x); }
-#else
-# define DBG(x)
-#endif
 
 extern int yylex (void);
 void yyerror (char *s);
@@ -95,5 +86,5 @@ state_list :
 
 void yyerror (char *s)
 {		
-    fprintf (stderr, "%s\n", s);
+    std::cerr << s << std::endl;
 }
