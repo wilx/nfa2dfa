@@ -1,12 +1,7 @@
 #include "nfa.hxx"
 #include <iterator>
 #include <functional>
-#ifdef HAVE_STD_SELETCT1ST
-using std::select1st;
-#elif HAVE_GNU_EXT_SELECT1ST
-# include <ext/functional>
-using __gnu_cxx::select1st;
-#endif
+#include "missing.hxx"
 
 const char* state_not_found::what () const throw ()
 {

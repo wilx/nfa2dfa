@@ -1,10 +1,10 @@
 CXXFLAGS = @CXXFLAGS@ -W -Wall -Wno-unused -pedantic
 bin_PROGRAMS = nfa2dfa
-nfa2dfa_SOURCES = nfa2dfa.cc nfa.cxx nfa.hxx parser.cxx parser.hxx \
-	lexer.cxx
+nfa2dfa_SOURCES = nfa2dfa.cc nfa.cxx nfa.hxx parser.cxx parser.hxx
+nfa2dfa_SOURCES += lexer.cxx missing.hxx
 nfa2dfa_LDADD = @LEXLIB@
-EXTRA_DIST = nfa.lex nfa.y tests/automaton*.txt tests/empty.txt \
-	COPYING
+EXTRA_DIST = nfa.lex nfa.y tests/automaton*.txt tests/empty.txt
+EXTRA_DIST += COPYING reconf
 
 lexer.cxx : nfa.lex
 	@LEX@ -o$@ $<

@@ -30,7 +30,7 @@ union optionValue {
 };
 
 optionValue options[OPT_COUNT];
-poptOption optionsDesc[] = {
+const poptOption optionsDesc[] = {
     {"convert",'c',POPT_ARG_NONE,&options[OPT_CONVERT],1,
      "convert NFA to DFA",NULL},
     {"rename",'r',POPT_ARG_NONE,&options[OPT_RENAME],1,
@@ -46,7 +46,7 @@ poptOption optionsDesc[] = {
     {"output",'o',POPT_ARG_STRING,&options[OPT_OUTFILE],1,
      "name of output file",NULL},
     POPT_AUTOHELP
-    POPT_TABLEEND
+    {NULL, '\0', 0, 0, 0, NULL, NULL}
 };
 
 int main(int argc, const char* argv[])
