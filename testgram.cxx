@@ -23,20 +23,20 @@ int main(int argc, char* argv[])
     else
 	yyin = stdin;
  
-    NFA* nfa = new NFA;
-    int ret = yyparse((void*)nfa);
+    NFA nfa;
+    int ret = yyparse((void*)&nfa);
     std::cerr << "yyparse() == " << ret << std::endl;
     if (ret == 1) {
 	std::cerr << "chyba pri parsovani vstupu" << std::endl;
-	std::copy(qq.begin(),qq.end(),std::ostream_iterator<std::string >(std::cout," => "));
+	std::copy(qq.begin(),qq.end(),
+		  std::ostream_iterator<std::string >(std::cout," => "));
 	exit(EXIT_FAILURE);
     }
 
-    for (DeltaMappingT::const_iterator i = nfa->delta.begin();
-	 i != nfa->delta.end();
+    for (DeltaMappingT::const_iterator i = nfa.delta.begin();
+	 i != nfa.delta.end();
 	 ++i) {
 	std::cout << i->first << std::endl;
     }
 
-    delete nfa;
 }
