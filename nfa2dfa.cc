@@ -77,9 +77,10 @@ int main(int argc, const char* argv[])
 	std::ostream* os = NULL;
 	if (options[OPT_OUTFILE].str != NULL) {
 	    outfile.open(options[OPT_OUTFILE].str);
-	    if (!os) {
+	    if (!outfile) {
 		std::cerr << "chyba pri otevirani vystupniho souboru" 
 			  << std::endl;
+		exit(EXIT_FAILURE);
 	    }
 	    os = &outfile;
 	}
