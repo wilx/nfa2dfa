@@ -1,0 +1,14 @@
+automaton Test
+initial state S {
+	2 -> {A B}
+}
+final state A {
+	0 -> A
+	1 -> B
+	2 -> {A B}
+}
+final state B {
+	0 -> A
+	1 -> B
+	2 -> {A B}
+}

@@ -1,0 +1,25 @@
+automaton Redundantni
+initial state S {
+0 -> A
+1 -> B
+}
+state A {
+0 -> C
+1 -> D
+}
+state B {
+0 -> C
+1 -> E
+}
+state C {
+0 -> C
+1 -> E
+}
+state D {
+0 -> C
+1 -> D
+}
+final state E {
+0 -> C
+1 -> E
+}

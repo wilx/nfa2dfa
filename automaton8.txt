@@ -1,0 +1,15 @@
+# Automat ktery prijima vstup koncici na sekvenci pismen 101
+automaton Konec
+initial state S {
+	0 -> S
+	1 -> {S A}
+}
+state A {
+      0 -> B
+}
+state B {
+      1 -> C
+}
+final state C {
+      
+}
