@@ -7,6 +7,7 @@
 #include <utility>
 #include <sstream>
 #include <exception>
+#include "config.h"
 
 typedef std::string StateT;
 typedef std::string LetterT;
