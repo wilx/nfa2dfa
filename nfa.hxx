@@ -63,5 +63,6 @@ std::string printNFA (const NFA_conv& nfa);
 std::set<LetterT > input_alphabet (const NFA& nfa);
 NFA_conv convert_NFA2DFA (const NFA& nfa);
 NFA fix_converted (const NFA_conv& nfa_conv, bool rename = false);
+void simplify (NFA& nfa);
 
 #endif

@@ -137,7 +137,6 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 	    if (marked.find(*un) == marked.end())
 		/* pridame ho k neoznacenym */
 		unmarked.insert(*un);
-	    
 	}
 	/* (c) The state q' element Q' will be marked. */
 	unmarked.erase(q_);
@@ -221,3 +220,86 @@ NFA fix_converted (const NFA_conv& nfa_conv, bool rename)
     return nfa;
 }
 
+struct EqSetRep {
+    StateT rep;
+    StateDeltaT stdelta;
+    bool final;
+    
+    EqSetRep(const StateT& st, const StateDeltaT& sd, bool f)
+	: rep(st), stdelta(sd), final(f) {}
+    friend bool operator== (const EqSetRep& el1, const EqSetRep& el2);
+    friend bool operator< (const EqSetRep& el1, const EqSetRep& el2);
+};
+
+void simplify (NFA& nfa)
+{
+    std::set<EqSetRep > repset;
+    std::map<StateT, StateT > substmap;
+    bool more = false;
+
+    do {
+	/* Jako prvni vloz pocatecni stav. */
+	{
+	    DeltaMappingT::iterator dmi = nfa.delta.find(nfa.initial);
+	    repset.insert(
+		EqSetRep(dmi->first,
+			 dmi->second,
+			 nfa.final.find(dmi->first) != nfa.final.end()));
+	}
+	/* Vytvor mnozinu reprezentantu jednotlivych trid ekvivalence 
+	   a take zobrazeni jednotlivych stavu na reprezentanta sve tridy. */
+	for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
+	     dmi != nfa.delta.end();
+	     ++dmi) {
+	    std::pair<std::set<EqSetRep >::iterator, bool > p = repset.insert(
+		EqSetRep(dmi->first,
+			 dmi->second,
+			 nfa.final.find(dmi->first) != nfa.final.end()));
+	    if (! p.second)
+		substmap.insert(make_pair(dmi->first,p.first->rep));
+	}
+	/* Smaz eqvivalentni stavy a proved nahradu za reprezentanta tridy. */
+	for (DeltaMappingT::iterator dmi = nfa.delta.begin();
+	     dmi != nfa.delta.end();
+	     ++dmi) {
+	    std::set<EqSetRep >::const_iterator ri = repset.find(
+		EqSetRep(dmi->first,
+			 dmi->second,
+			 nfa.final.find(dmi->first) != nfa.final.end()));
+	    /* Pokud to neni reprezentant, tak ho smazem.  */
+	    if (ri->rep != dmi->first) {
+		nfa.delta.erase(dmi);
+		more = true;
+	    }
+	    else {
+		for (StateDeltaT::iterator sdi = dmi->second.begin();
+		     sdi != dmi->second.end();
+		     ++sdi) {
+		    for (SetOfStatesT::iterator si = sdi->second.begin();
+			 si != sdi->second.end();
+			 ++si) {
+			StateT subst(substmap.find(*si)->second);
+			sdi->second.erase(si);
+			sdi->second.insert(subst);
+		    }
+		}
+	    }
+	}
+    } while (more);
+}
+
+inline bool operator< (const EqSetRep& el1, const EqSetRep& el2) 
+{
+    if (el1.stdelta < el2.stdelta)
+	return true;
+    else
+	if (el1.stdelta == el2.stdelta)
+	    return el1.final < el2.final;
+	else
+	    return false;
+}
+
+inline bool operator== (const EqSetRep& el1, const EqSetRep& el2)
+{
+    return el1.stdelta == el2.stdelta && el1.final == el2.final;
+}
