@@ -7,6 +7,7 @@
 #include <utility>
 #include <sstream>
 #include <iterator>
+#include <exception>
 
 typedef std::string StateT;
 typedef std::string LetterT;
@@ -31,9 +32,15 @@ struct NFA_conv {
 typedef std::pair<StateT, StateDeltaT > StateAndDeltaPairT;
 typedef std::pair<LetterT, SetOfStatesT > LetterAndSetOfStatesPairT;
 
+/* Vyjimky */
+class state_not_found : public std::exception {
+public:
+    virtual const char* what () const throw ();
+};
+
 /* Funkce pro vystup do streamu */
 template <typename Res, typename Seq>
-static Res join_seq (const Res& sep, const Seq& seq)
+Res join_seq (const Res& sep, const Seq& seq)
 {
     if (seq.empty())
 	return Res();
@@ -52,61 +59,10 @@ static Res join_seq (const Res& sep, const Seq& seq)
     return ss.str();
 }
 
-static std::string printNFA (const NFA& nfa)
-{
-    std::ostringstream ss;
-    
-    ss << "name " << nfa.name << std::endl;
-    for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
-	 dmi != nfa.delta.end();
-	 ++dmi) {
-	const StateT& st = dmi->first;
-	if (st == nfa.initial)
-	    ss << "initial ";
-	if (nfa.final.find(st) != nfa.final.end())
-	    ss << "final ";
-	ss << "state " << st << " {" << std::endl;
-	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
-	     sdi != dmi->second.end();
-	     ++sdi) {
-	    ss << sdi->first << " -> { ";
-	    std::copy(sdi->second.begin(), sdi->second.end(),
-		      std::ostream_iterator<StateT >(ss," "));
-	    ss << "}" << std::endl;
-	}
-	ss << "}" << std::endl;
-    }
-
-    return ss.str();
-}
-
-static std::string printNFA (const NFA_conv& nfa)
-{
-    std::ostringstream ss;
-    
-    ss << "name " << nfa.name << std::endl;
-    for (std::map<SetOfStatesT, StateDeltaT >::const_iterator dmi 
-	     = nfa.delta.begin();
-	 dmi != nfa.delta.end();
-	 ++dmi) {
-	const SetOfStatesT& st = dmi->first;
-	if (st == nfa.initial)
-	    ss << "initial ";
-	if (nfa.final.find(st) != nfa.final.end())
-	    ss << "final ";
-	ss << "state " << join_seq(std::string("-"),st) << " {" << std::endl;
-	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
-	     sdi != dmi->second.end();
-	     ++sdi) {
-	    ss << sdi->first << " -> { ";
-	    std::copy(sdi->second.begin(), sdi->second.end(),
-		      std::ostream_iterator<StateT >(ss," "));
-	    ss << "}" << std::endl;
-	}
-	ss << "}" << std::endl;
-    }
-    
-    return ss.str();
-}
+std::string printNFA (const NFA& nfa);
+std::string printNFA (const NFA_conv& nfa);
+std::set<LetterT > input_alphabet (const NFA& nfa);
+NFA_conv convert_NFA2DFA (const NFA& nfa);
+NFA fix_converted (const NFA_conv& nfa_conv);
 
 #endif
