@@ -1,9 +1,11 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(nfa2dfa.cc)
+AC_PREREQ(2.57)
+AC_INIT
+AC_CONFIG_SRCDIR([nfa2dfa.cc])
+AM_INIT_AUTOMAKE(nfa2dfa, 0.1)
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
-AM_INIT_AUTOMAKE(nfa2dfa, 0.1)
 AM_CONFIG_HEADER([config.h])
 AC_PROG_CXX
 AC_PROG_INSTALL
@@ -11,27 +13,10 @@ AM_PROG_LEX
 AC_PROG_YACC
 AC_CHECK_HEADER(popt.h,,[AC_MSG_ERROR([popt.h not found])])
 AC_CHECK_LIB(popt,poptGetContext,,[AC_MSG_ERROR([libpopt not found])])
-
-dnl Test for select1st functor
-AC_LANG_PUSH(C++)
-AH_TEMPLATE([HAVE_STD_SELECT1ST],
-[Define if you have std::select1st functor.])
-AH_TEMPLATE([HAVE_GNU_EXT_SELECT1ST],
-[Define if you have __gnu_cxx:select1st functor.])
-AC_MSG_CHECKING([[for select1st function object]])
-select1st=no
-AC_TRY_COMPILE([#include <utility>
-#include <functional>],
-[std::select1st<std::pair<int, int > > s1st;],
-[AC_DEFINE(HAVE_STD_SELECT1ST) select1st='std::select1st'])
-if test $select1st = no; then
-AC_TRY_COMPILE([#include <utility>
-#include <ext/functional>],
-[__gnu_cxx::select1st<std::pair<int, int > > s1st;],
-[AC_DEFINE(HAVE_GNU_EXT_SELECT1ST) select1st='__gnu_cxx::select1st'])
-fi
-AC_MSG_RESULT([$select1st])
-AC_LANG_POP
+AX_SELECT1ST
+dnl libtool
+AC_PROG_LIBTOOL
+AC_SUBST(LIBTOOL_DEPS)
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

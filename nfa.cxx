@@ -1,6 +1,7 @@
 #include "nfa.hxx"
 #include <iterator>
 #include <functional>
+#include <iostream>
 #include "missing.hxx"
 
 const char* state_not_found::what () const throw ()
@@ -168,7 +169,7 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
     NFA_conv nfa_conv;
     /* 1. The set Q' = {{q0}} will be defined, the state {q0} will be treated
        as unmarked. */
-    std::set<LetterT > alphabet = input_alphabet(nfa);
+    const std::set<LetterT > alphabet (input_alphabet(nfa));
     std::set<SetOfStatesT > Qnew, unmarked, marked;
     SetOfStatesT q0set;
     q0set.insert(nfa.initial);
@@ -193,11 +194,11 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 		 p != q_.end();
 		 ++p) {
 		// najdi StateDeltaT pro stav
-		DeltaMappingT::const_iterator dmi = nfa.delta.find(*p);
+		const DeltaMappingT::const_iterator dmi (nfa.delta.find(*p));
 		// element nenalezen
 		if (dmi == nfa.delta.end())
 		    throw state_not_found();
-		const StateDeltaT& sd = dmi->second;
+		const StateDeltaT& sd (dmi->second);
 		/* Najdi mnozinu cilovych stavu ze stavu *p pri 
 		   vstupnim pismenu *letter. */
 		StateDeltaT::const_iterator sdi = sd.find(*letter);
@@ -307,7 +308,7 @@ NFA& rename_states(NFA& nfa)
     return nfa;
 }
 
-NFA fix_converted (const NFA_conv& nfa_conv, bool rename)
+NFA fix_converted (const NFA_conv& nfa_conv, const bool rename)
 {
     NFA nfa;
     std::string stname("A");
@@ -369,12 +370,14 @@ void simplify (NFA& nfa)
 {
     std::set<EqSetRep > repset;
     std::map<StateT, StateT > substmap;
-    bool more = false;
+    bool more;
 
     do {
+	more = false;
 	/* Jako prvni vloz pocatecni stav. */
 	{
-	    DeltaMappingT::iterator dmi = nfa.delta.find(nfa.initial);
+	    const DeltaMappingT::const_iterator dmi 
+	      = nfa.delta.find(nfa.initial);
 	    repset.insert(
 		EqSetRep(dmi->first,
 			 dmi->second,
@@ -389,6 +392,8 @@ void simplify (NFA& nfa)
 		EqSetRep(dmi->first,
 			 dmi->second,
 			 nfa.final.find(dmi->first) != nfa.final.end()));
+	    /* !p.second == true znamena, ze uz mame reprezentanta pro tento
+	       stav a tak jen vlozime zaznam do tabulky substituci. */
 	    if (! p.second)
 		substmap.insert(make_pair(dmi->first,p.first->rep));
 	}
@@ -412,7 +417,14 @@ void simplify (NFA& nfa)
 		    for (SetOfStatesT::iterator si = sdi->second.begin();
 			 si != sdi->second.end();
 			 ++si) {
-			StateT subst(substmap.find(*si)->second);
+			std::clog << "hledani nahrady pro stav " << *si
+				  << std::endl;
+			std::clog << "substmap.size (): " << substmap.size()
+				  << std::endl;
+			if (substmap.find(*si) == substmap.end())
+			    std::clog << "substmap.find(*si) == substmap.end()"
+				      << std::endl;
+			const StateT subst(substmap.find(*si)->second);
 			sdi->second.erase(si);
 			sdi->second.insert(subst);
 		    }

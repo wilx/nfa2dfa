@@ -95,10 +95,12 @@ int main(int argc, const char* argv[])
 	    nfa_conv = convert_NFA2DFA(nfa);
 	    nfa = fix_converted(nfa_conv);
 	}
-       
+
+	simplify (nfa);
+
 	if (options[OPT_RENAME].val)
 	    rename_states(nfa);
-	
+
 	if (options[OPT_DOT].val)
 	    *os << printNFA2dot(nfa);
 	else
@@ -107,14 +109,18 @@ int main(int argc, const char* argv[])
 	    else
 		*os << printNFA(nfa);
     }
-    catch (state_not_found& e) {
+    catch (const state_not_found& e) {
 	std::cerr << "chyba pri prevodu v convert_NFA2DFA(): " 
 		  << e.what() << std::endl;
 	std::cerr << "zobrazeni delta na neznamy stav" << std::endl;
 	exit(EXIT_FAILURE);
     }
-    catch (std::exception& e) {
+    catch (const std::exception& e) {
 	std::cerr << "vyjimka: " << e.what() << std::endl;
+	exit(EXIT_FAILURE);
+    }
+    catch (const std::string& e) {
+	std::cerr <<"vyjimka: " << e << std::endl;
 	exit(EXIT_FAILURE);
     }
     catch (...) {
