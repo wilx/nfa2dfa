@@ -2,7 +2,7 @@
 
 aclocal \
 && autoheader \
-&& automake --foreign --add-missing \
+&& automake --foreign --add-missing --copy \
 && autoconf
 
 if test -x ./config.status; then 

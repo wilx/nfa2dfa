@@ -4,7 +4,7 @@ nfa2dfa_SOURCES = nfa2dfa.cc nfa.cxx nfa.hxx parser.cxx parser.hxx
 nfa2dfa_SOURCES += lexer.cxx missing.hxx
 nfa2dfa_LDADD = @LEXLIB@
 EXTRA_DIST = nfa.lex nfa.y tests/automaton*.txt tests/empty.txt
-EXTRA_DIST += COPYING reconf
+EXTRA_DIST += COPYING reconf config.sub config.guess
 
 lexer.cxx : nfa.lex
 	@LEX@ -o$@ $<

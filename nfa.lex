@@ -9,7 +9,7 @@
 
 %%
 
-[[:space:]]+
+[[:space:]]+            /* ignore spaces */
 #.*$			/* ignore comments */
 "{"			{ return '{'; }
 "}"			{ return '}'; }

@@ -59,6 +59,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 
 EXEEXT = @EXEEXT@
 OBJEXT = @OBJEXT@
@@ -82,7 +84,7 @@ CXXFLAGS = @CXXFLAGS@ -W -Wall -Wno-unused -pedantic
 bin_PROGRAMS = nfa2dfa
 nfa2dfa_SOURCES = nfa2dfa.cc nfa.cxx nfa.hxx parser.cxx parser.hxx lexer.cxx missing.hxx
 nfa2dfa_LDADD = @LEXLIB@
-EXTRA_DIST = nfa.lex nfa.y tests/automaton*.txt tests/empty.txt COPYING reconf
+EXTRA_DIST = nfa.lex nfa.y tests/automaton*.txt tests/empty.txt COPYING reconf config.sub config.guess
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -117,8 +119,9 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(nfa2dfa_SOURCES)
-DIST_COMMON = COPYING Makefile.am Makefile.in aclocal.m4 config.h.in \
-	configure configure.in depcomp install-sh missing mkinstalldirs
+DIST_COMMON = COPYING Makefile.am Makefile.in aclocal.m4 config.guess \
+	config.h.in config.sub configure configure.in depcomp \
+	install-sh missing mkinstalldirs
 SOURCES = $(nfa2dfa_SOURCES)
 
 all: config.h

@@ -1,11 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <cstdio>
-#include <algorithm>
-#include <iterator>
-#include <utility>
-#include <deque>
-#include <string>
 #include <cstdlib>
 #include <exception>
 #include <popt.h>
@@ -15,13 +10,12 @@ extern int yyparse (void*);
 extern FILE* yyin;
 extern char* filename;
 
-#define OPT_CONVERT 0
-#define OPT_RENAME 1
-#define OPT_DOT 2
-#define OPT_VCG 3
-#define OPT_NOTHING 4
-#define OPT_INFILE 5
-#define OPT_OUTFILE 6
+#define OPT_RENAME 0
+#define OPT_DOT 1
+#define OPT_VCG 2
+#define OPT_NOTHING 3
+#define OPT_INFILE 4
+#define OPT_OUTFILE 5
 #define OPT_COUNT OPT_OUTFILE+1
 
 union optionValue {
@@ -31,8 +25,6 @@ union optionValue {
 
 optionValue options[OPT_COUNT];
 const poptOption optionsDesc[] = {
-    {"convert",'c',POPT_ARG_NONE,&options[OPT_CONVERT],1,
-     "convert NFA to DFA",NULL},
     {"rename",'r',POPT_ARG_NONE,&options[OPT_RENAME],1,
      "rename states",NULL},
     {"dot",'d',POPT_ARG_NONE,&options[OPT_DOT],1,
@@ -40,7 +32,7 @@ const poptOption optionsDesc[] = {
     {"vcg",'v',POPT_ARG_NONE,&options[OPT_VCG],1,
      "generate VCG graph description",NULL},
     {"do-nothing",'n',POPT_ARG_NONE,&options[OPT_NOTHING],1,
-     "do nothing, just print input to output",NULL},
+     "don't convert, just print input to output",NULL},
     {"input",'i',POPT_ARG_STRING,&options[OPT_INFILE],1,
      "name of input file","file name"},
     {"output",'o',POPT_ARG_STRING,&options[OPT_OUTFILE],1,
@@ -99,19 +91,13 @@ int main(int argc, const char* argv[])
 	    exit(EXIT_FAILURE);
 	}
 
-	if (options[OPT_NOTHING].val) {
-	    *os << printNFA(nfa);
-	    exit(EXIT_SUCCESS);
-	}
-	
-	if (options[OPT_CONVERT].val) {
+	if (! options[OPT_NOTHING].val) {
 	    nfa_conv = convert_NFA2DFA(nfa);
 	    nfa = fix_converted(nfa_conv);
 	}
        
-	if (options[OPT_RENAME].val) {
+	if (options[OPT_RENAME].val)
 	    rename_states(nfa);
-	}
 	
 	if (options[OPT_DOT].val)
 	    *os << printNFA2dot(nfa);

@@ -252,11 +252,11 @@ static void next_name (std::string& s)
     for (std::string::const_iterator ch = s.begin();
 	 ch != s.end();
 	 ++ch)
-	x = x*rng + (unsigned)(*ch);
+	x = x*rng + (unsigned)(*ch - 'A');
     ++x;
     s.erase(s.begin(), s.end());
     while (x != 0) {
-	s.insert(s.begin(),(char)(x % rng));
+	s.insert(s.begin(),(char)('A' + (x % rng)));
 	x /= rng;
     }
 }
