@@ -1,18 +1,11 @@
 
-#include <set>
-#include <map>
-#include <utility>
+#include "nfa.hxx"
 
-typedef char StateT;
-typedef char LetterT;
-
-struct StateDelta {
-    std::map<LetterT, StateT > delta;
-};
+static NFA* nfa;
 
 int main (int argc, char* argv[])
 {
-    std::map<StateT, StateDelta > nfa;
-
+    nfa = new NFA; 
+    
     
 }

@@ -10,19 +10,22 @@ test : testgram.o lexer.o parser.o
 
 testgram.o : testgram.cxx
 
+testgram.cxx : nfa.hxx
+
 lexer.o : lexer.cxx
 
-lexer.cxx : nfa.lex
-	flex -8 -b -c -d -o$@ $^
+lexer.cxx : nfa.lex nfa.hxx parser.hxx
+	flex -8 -b -c -d -o$@ $<
 
-nfa.lex : parser.hxx
+#nfa.lex : parser.hxx
 
 parser.o : parser.cxx
 
-parser.cxx : nfa.y parser.hxx
-	bison -k -v -d -g -t -d -o$@ $<
+parser.cxx : nfa.y nfa.hxx parser.hxx
+	bison -k -v -d -g -t -o$@ $^
 
-parser.hxx : yynfa.hxx
+parser.hxx : nfa.y nfa.hxx
+	bison -k -v -d -g -t -o$@ $^
 
 %.o : %.cxx
 	$(CXX) $(CXXFLAGS) $< -c -o $@

@@ -1,7 +1,7 @@
 %{
 #include <string>
 #include <iostream>
-#include "yynfa.hxx"
+#include "nfa.hxx"
 #include "parser.hxx"
 %}
 
