@@ -23,10 +23,14 @@ std::string printNFA (const NFA& nfa)
 	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
 	     sdi != dmi->second.end();
 	     ++sdi) {
-	    ss << sdi->first << " -> { ";
+	    ss << sdi->first << " -> ";
+	    if (sdi->second.size() > 1)
+		ss << "{ ";
 	    std::copy(sdi->second.begin(), sdi->second.end(),
 		      std::ostream_iterator<StateT >(ss," "));
-	    ss << "}" << std::endl;
+	    if (sdi->second.size() > 1)
+		ss << "}";
+	    ss << std::endl;
 	}
 	ss << "}" << std::endl;
     }
@@ -53,9 +57,9 @@ std::string printNFA (const NFA_conv& nfa)
 	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
 	     sdi != dmi->second.end();
 	     ++sdi) {
-	    ss << sdi->first << " -> { " 
+	    ss << sdi->first << " -> " 
 	       << join_seq(std::string("-"),sdi->second)
-	       << " }" << std::endl;
+	       << std::endl;
 	}
 	ss << "}" << std::endl;
     }
