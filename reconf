@@ -4,3 +4,7 @@ aclocal \
 && autoheader \
 && automake --foreign --add-missing \
 && autoconf
+
+if test -f ./config.status; then 
+    ./config.status --recheck
+fi
