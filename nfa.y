@@ -71,9 +71,9 @@ delta_list :
 delta : 
   TOK_ID TOK_ARROW '{' state_list '}'
 				{ $$ = new LetterAndSetOfStatesPairT(*$1,*$4); }
-| TOK_ID TOK_ARROW TOK_ID	{ SetOfStatesT* sos = new SetOfStatesT;
-				  sos->insert(*$3);
-				  $$ = new LetterAndSetOfStatesPairT(*$1,*sos); }
+| TOK_ID TOK_ARROW TOK_ID	{ SetOfStatesT sos;
+				  sos.insert(*$3);
+				  $$ = new LetterAndSetOfStatesPairT(*$1,sos); }
 ;
 
 state_list :
