@@ -1,6 +1,8 @@
 LIBS = -lfl
 CXX = c++
-CXXFLAGS = -ggdb -W -Wall -Wno-unused -pedantic -DYYPARSE_PARAM=ptr -DYYDEBUG
+# CXXFLAGS = -ggdb -W -Wall -Wno-unused -pedantic -O2 -march=athlon-tbird \
+#	-save-temps -fverbose-asm -fprefetch-loop-arrays -funroll-loops
+CXXFLAGS = -ggdb -W -Wall -Wno-unused -pedantic
 EXE = .exe
 
 all : test
@@ -8,18 +10,16 @@ all : test
 test : testgram.o lexer.o parser.o
 	$(CXX) -o $@ $^ $(LIBS)
 
-testgram.o : testgram.cxx
+testgram.o : testgram.cxx nfa.hxx
 
-testgram.cxx : nfa.hxx
+lexer.o : lexer.cxx nfa.hxx parser.hxx
 
-lexer.o : lexer.cxx
+lexer.cxx : nfa.lex
+	flex -d -B -8 -o$@ $<
 
-lexer.cxx : nfa.lex nfa.hxx parser.hxx
-	flex -8 -b -c -d -o$@ $<
+parser.o : parser.cxx nfa.hxx
 
-parser.o : parser.cxx
-
-parser.cxx : nfa.y nfa.hxx
+parser.cxx : nfa.y
 	bison -k -v -d -g -t -o$@ $<
 
 parser.hxx : parser.cxx
