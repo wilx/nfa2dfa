@@ -125,6 +125,8 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 		    continue;
 		un->insert(sdi->second.begin(), sdi->second.end());
 	    }
+	    if (un->empty())
+		continue;
 	    stdelta.insert(make_pair(*letter,*un));
 	    /* (b) Q' = Q' union delta'(q',a) for all a element T. */
 	    Qnew.insert(*un);
