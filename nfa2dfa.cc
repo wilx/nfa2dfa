@@ -58,6 +58,8 @@ int main(int argc, char* argv[])
 		  << printNFA(fix_converted(nfa_conv,true)) << std::endl;
 	/* simplify(nfa);
 	   std::cout << "simplifed: " << printNFA(nfa) << std::endl; */
+	std::cout << "dot:" <<std::endl
+		  << printNFA2dot(fix_converted(nfa_conv)) << std::endl;
     }
     catch (std::exception& e) {
 	std::cerr << "vyjimka: " << e.what() << std::endl;

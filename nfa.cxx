@@ -67,6 +67,40 @@ std::string printNFA (const NFA_conv& nfa)
     return ss.str();
 }
 
+std::string printNFA2dot (const NFA& nfa)
+{
+    std::ostringstream ss;
+    
+    ss << "digraph \"" << nfa.name << "\" {" << std::endl;
+    ss << "node [ shape = doublecircle ]; ";
+    /*std::copy(nfa.final.begin(), nfa.final.end(), 
+      std::ostream_iterator<StateT >(ss, " "));*/
+    ss << "{ \"" << join_seq(std::string("\" \""), nfa.final) << "\" }";
+    ss << ";" << std::endl;
+    ss << "node [ shape = Mcircle ]; \"" << nfa.initial << "\";" << std::endl;
+    ss << "node [ shape = circle ];" << std::endl;
+    ss << "rankdir = LR;" << std::endl;
+    for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
+	 dmi != nfa.delta.end();
+	 ++dmi) {
+	const StateT& st = dmi->first;
+	/*if (st == nfa.initial)
+	  continue;*/
+	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
+	     sdi != dmi->second.end();
+	     ++sdi) {
+	    /*std::copy(sdi->second.begin(), sdi->second.end(),
+	      std::ostream_iterator<StateT >(ss, " "));*/
+	    ss << "\"" << dmi->first << "\" -> { ";
+	    ss << "\"" << join_seq(std::string("\" \""), sdi->second) << "\"";
+	    ss << " } [ label = \"" << sdi->first << "\" ];" << std::endl;
+	}
+    }
+    ss << "}" << std::endl;
+
+    return ss.str();
+}
+
 /* Get set of input alphabet T from automaton's delta mapping. */
 std::set<LetterT > input_alphabet (const NFA& nfa)
 {
