@@ -3,9 +3,9 @@
 
 #include "config.h"
 
-#ifdef HAVE_STD_SELETCT1ST
+#if defined(HAVE_STD_SELETCT1ST)
 using std::select1st;
-#elif HAVE_GNU_EXT_SELECT1ST
+#elif defined(HAVE_GNU_EXT_SELECT1ST)
 # include <ext/functional>
 using __gnu_cxx::select1st;
 #else

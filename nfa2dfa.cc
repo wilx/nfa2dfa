@@ -34,7 +34,7 @@ const poptOption optionsDesc[] = {
     {"convert",'c',POPT_ARG_NONE,&options[OPT_CONVERT],1,
      "convert NFA to DFA",NULL},
     {"rename",'r',POPT_ARG_NONE,&options[OPT_RENAME],1,
-     "rename states after conversion",NULL},
+     "rename states",NULL},
     {"dot",'d',POPT_ARG_NONE,&options[OPT_DOT],1,
      "generate dot graph description",NULL},
     {"vcg",'v',POPT_ARG_NONE,&options[OPT_VCG],1,
@@ -42,9 +42,9 @@ const poptOption optionsDesc[] = {
     {"do-nothing",'n',POPT_ARG_NONE,&options[OPT_NOTHING],1,
      "do nothing, just print input to output",NULL},
     {"input",'i',POPT_ARG_STRING,&options[OPT_INFILE],1,
-     "name of input file",NULL},
+     "name of input file","file name"},
     {"output",'o',POPT_ARG_STRING,&options[OPT_OUTFILE],1,
-     "name of output file",NULL},
+     "name of output file","file name"},
     POPT_AUTOHELP
     {NULL, '\0', 0, 0, 0, NULL, NULL}
 };
