@@ -1,0 +1,12 @@
+This simple program converts non-deterministic finite automaton to
+deterministic finite automaton using algorithm 2.25 from [1]. Input
+and default output description of automaton is that used in automatons'
+descriptions in test/ directory. 
+
+Automaton's description can also be output in either form of directed
+graph description in .dot format (GraphViz package) or in VCG
+format. Automaton's decriptions in these formats can be consequently
+visualized with appropriate tools.
+
+[1] Melichar, B., Holub, J., Muzatko, P.: Languages And Translations,
+Prague, Publishing house of CTU, 1997
