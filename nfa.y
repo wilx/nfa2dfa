@@ -75,7 +75,6 @@ delta_list :
   delta ',' delta_list		{ $3->insert(*$1); $$ = $3; }
 | delta delta_list		{ $2->insert(*$1); $$ = $2; }
 | delta				{ $$ = new StateDeltaT; $$->insert(*$1); }
-| /* empty */			{ $$ = new StateDeltaT; }
 ;
 
 delta : 
@@ -90,7 +89,6 @@ state_list :
   TOK_ID ',' state_list		{ $3->insert(*$1); $$ = $3; }  
 | TOK_ID state_list		{ $2->insert(*$1); $$ = $2; } 
 | TOK_ID			{ $$ = new SetOfStatesT; $$->insert(*$1); }
-| /* empty */			{ $$ = new SetOfStatesT; }
 ;
 
 %%
