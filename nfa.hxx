@@ -10,7 +10,13 @@ typedef std::string StateT;
 typedef std::string LetterT;
 typedef std::set<StateT > SetOfStatesT;
 typedef std::map<LetterT, SetOfStatesT > StateDeltaT;
-typedef std::map<StateT, StateDeltaT > NFA;
+typedef std::map<StateT, StateDeltaT > DeltaMappingT;
+struct NFA {
+    std::string name;
+    StateT start;
+    SetOfStatesT final;
+    DeltaMappingT delta;
+};
 
 /*
   Pomocne typy urcene prevazne pro pouziti v parseru.
