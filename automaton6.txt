@@ -1,0 +1,12 @@
+# automat z moji oprevne pismeky z JPR
+automaton Pisemka
+initial state S {
+      0 -> A
+      1 -> {A,S}
+}
+state A {
+      0 -> {B,S}
+}
+final state B {
+      1 -> {B,S}
+}
