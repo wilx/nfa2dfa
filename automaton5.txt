@@ -1,0 +1,3 @@
+# delta na neznamy stav
+automaton Spatny
+state S { 0 -> NEZNAMY }

@@ -1,0 +1,7 @@
+name test2
+initial state S { 0 -> {A }
+	          1 -> S }
+final state A { 1 -> S
+		0 -> {A S} }
+#state B { 0 -> A
+#	  1 -> S }

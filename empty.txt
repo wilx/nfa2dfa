@@ -1,0 +1,3 @@
+# Automat s prazdnym zobrazenim delta
+name Empty
+state A { }

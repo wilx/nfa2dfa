@@ -1,0 +1,10 @@
+# automat z prikladu 3.5 ze skript Jazyky a preklady - cviceni
+name Priklad-3.5
+initial state q0 { 0 -> {q0 q3} 
+		   1 -> {q0 q1} }
+state q1 { 1 -> q2 }
+final state q2 { 0 -> q2
+		 1 -> q2 }
+state q3 { 0 -> q4 }
+final state q4 { 0 -> q4
+	         1 -> q4 }
