@@ -2,12 +2,12 @@
 #include <cstdio>
 #include "nfa.hxx"
 
-extern int yyparse (void);
-
-NFA* nfa;
+extern int yyparse (void*);
+extern FILE* yyin;
 
 int main(void)
 {
-    nfa = new NFA;
-    return yyparse();
+    NFA* nfa = new NFA;
+    return yyparse((void*)nfa);
+    delete nfa;
 }

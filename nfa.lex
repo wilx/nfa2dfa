@@ -6,6 +6,7 @@
 %}
 
 %pointer
+%option yylineno
 
 %%
 
@@ -17,6 +18,6 @@
 ->			{ return TOK_ARROW; }
 state			{ return TOK_STATE; }
 [[:alnum:]]+		{ yylval.str = new std::string(yytext); return TOK_ID; }
-.			{ }
+.			{ return *yytext; }
 
 %%

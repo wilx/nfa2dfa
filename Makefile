@@ -1,6 +1,6 @@
 LIBS = -lfl
 CXX = c++
-CXXFLAGS = -ggdb
+CXXFLAGS = -ggdb -W -Wall -Wno-unused -pedantic -DYYPARSE_PARAM=ptr -DYYDEBUG
 EXE = .exe
 
 all : test
@@ -17,17 +17,20 @@ lexer.o : lexer.cxx
 lexer.cxx : nfa.lex nfa.hxx parser.hxx
 	flex -8 -b -c -d -o$@ $<
 
-#nfa.lex : parser.hxx
-
 parser.o : parser.cxx
 
-parser.cxx : nfa.y nfa.hxx parser.hxx
-	bison -k -v -d -g -t -o$@ $^
+parser.cxx : nfa.y nfa.hxx
+	bison -k -v -d -g -t -o$@ $<
 
-parser.hxx : nfa.y nfa.hxx
-	bison -k -v -d -g -t -o$@ $^
+parser.hxx : parser.cxx
 
 %.o : %.cxx
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
-.PHONY : all test
+clean : 
+	rm -rf *.o
+	rm -rf *.exe
+	rm -rf parser.[ch]xx
+	rm -rf lexer.cxx
+
+.PHONY : all test clean
