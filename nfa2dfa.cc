@@ -5,15 +5,32 @@
 #include <utility>
 #include <deque>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 #include "nfa.hxx"
 
 extern int yyparse (void*);
 extern FILE* yyin;
 extern std::deque<std::string > qq;
 
+/* Get set of input alphabet T from automaton's delta mapping. */
+std::set<LetterT > input_alphabet (const NFA& nfa)
+{
+    std::set<LetterT> alphabet;
+    for (DeltaMappingT::const_iterator i = nfa.delta.begin();
+	 i != nfa.delta.end();
+	 ++i) {
+	for (StateDeltaT::const_iterator k = i->second.begin();
+	     k != i->second.end();
+	     ++k) {
+	    alphabet.insert(k->first);
+	}
+    }
+    return alphabet;
+}
+
 int main(int argc, char* argv[])
 {
+    /* Osetreni parametru vstupniho souboru */
     if (argc == 2) {
 	if (!(yyin = fopen(argv[1],"r"))) {
 	    perror("chyba fopen()");
@@ -32,23 +49,13 @@ int main(int argc, char* argv[])
 		  std::ostream_iterator<std::string >(std::cout," => "));
 	exit(EXIT_FAILURE);
     }
-    std::cout << printNFA(nfa) << std::endl;
-    
-    /* Get set of input alphabet T from automaton's delta mapping. */
-    std::set<LetterT> alphabet;
-    for (DeltaMappingT::const_iterator i = nfa.delta.begin();
-	 i != nfa.delta.end();
-	 ++i) {
-	for (StateDeltaT::const_iterator k = i->second.begin();
-	     k != i->second.end();
-	     ++k) {
-	    alphabet.insert(k->first);
-	}
-    }
+    /* Testovaci vypis vstupniho automatu. */
+    std::cout << "input:" << std::endl << printNFA(nfa) << std::endl;
 
     /* 1. The set Q' = {{q0}} will be defined, the state {q0} will be treated
        as unmarked. */
-    std::set<SetOfStatesT > Qnew, unmarked;
+    std::set<LetterT > alphabet = input_alphabet(nfa);
+    std::set<SetOfStatesT > Qnew, unmarked, marked;
     SetOfStatesT q0set;
     q0set.insert(nfa.initial);
     Qnew.insert(q0set);
@@ -56,7 +63,6 @@ int main(int argc, char* argv[])
     
     /* 2. If each state in Q' is marked, then continue with step (4). */
     while (! unmarked.empty()) {
-	std::cerr << "unmarked.size()==" << unmarked.size() << std::endl;
 	/* 3. An unmarked state q' will be chosen from Q' and th following
 	   operations will be executed: */
 	SetOfStatesT q_ = *unmarked.begin();
@@ -67,7 +73,6 @@ int main(int argc, char* argv[])
 	for (std::set<LetterT >::const_iterator letter = alphabet.begin();
 	     letter != alphabet.end();
 	     ++letter) {
-	    std::cerr << "cnt==" << ++cnt << std::endl;
 	    /* alokace promenne pro sjednoceni union(delta(p,a)) 
 	       for p element q' */
 	    SetOfStatesT* un = new SetOfStatesT;
@@ -75,7 +80,6 @@ int main(int argc, char* argv[])
 	    for (SetOfStatesT::const_iterator p = q_.begin();
 		 p != q_.end();
 		 ++p) {
-		std::cerr << "cnt2==" << ++cnt2 << std::endl;
 		// najdi StateDeltaT pro stav
 		DeltaMappingT::const_iterator dmi = nfa.delta.find(*p);
 		// element nenalezen
@@ -93,8 +97,13 @@ int main(int argc, char* argv[])
 	    stdelta.insert(make_pair(*letter,*un));
 	    /* (b) Q' = Q' union delta'(q',a) for all a element T. */
 	    Qnew.insert(*un);
+	    /* pokud stav jeste neni oznaceny */
+	    if (marked.find(*un) == marked.end())
+		/* pridame ho k neoznacenym */
+		unmarked.insert(*un);
 	    /* (c) The state q' element Q' will be marked. */
 	    unmarked.erase(q_);
+	    marked.insert(q_);
 	    /* (d) Continue with step (2). */
 	}
 	nfa_conv.delta.insert(make_pair(q_,stdelta));
@@ -116,6 +125,9 @@ int main(int argc, char* argv[])
 	if (! inter.empty())
 	    nfa_conv.final.insert(*q_);
     }
- 
-    
+
+    /* Testovaci vypis prevedeneho automatu */
+    std::cout << "converted:" << std::endl << printNFA(nfa_conv) << std::endl;
+
+    exit(EXIT_SUCCESS);
 }
