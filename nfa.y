@@ -6,6 +6,8 @@
 #define YYERROR_VERBOSE 1
 #define YYDEBUG 1
 
+char* filename = "";
+extern int yylineno;
 extern int yylex (void);
 void yyerror (char *s);
 
@@ -91,5 +93,5 @@ state_list :
 
 void yyerror (char *s)
 {		
-    std::cerr << s << std::endl;
+    std::cerr << filename << ":" << yylineno << " " << s << std::endl;
 }
