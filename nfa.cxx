@@ -79,7 +79,7 @@ std::string printNFA2dot (const NFA& nfa)
     ss << ";" << std::endl;
     ss << "node [ shape = box, color = green ]; \"" 
        << nfa.initial << "\";" << std::endl;
-    ss << "node [ shape = ellipse ];" << std::endl;
+    ss << "node [ shape = ellipse, color = black ];" << std::endl;
     ss << "rankdir = LR;" << std::endl;
     for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
 	 dmi != nfa.delta.end();
@@ -133,12 +133,13 @@ std::string printNFA2vcg (const NFA& nfa)
 	}
     }
     ss << "}" << std::endl;
-    return ss.str();
- }
 
- /* Get set of input alphabet T from automaton's delta mapping. */
- std::set<LetterT > input_alphabet (const NFA& nfa)
- {
+    return ss.str();
+}
+
+/* Get set of input alphabet T from automaton's delta mapping. */
+std::set<LetterT > input_alphabet (const NFA& nfa)
+{
      std::set<LetterT> alphabet;
      for (DeltaMappingT::const_iterator i = nfa.delta.begin();
 	  i != nfa.delta.end();
