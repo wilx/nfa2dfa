@@ -1,5 +1,5 @@
 #include "nfa.hxx"
-#include <iostream>
+#include <iterator>
 
 const char* state_not_found::what () const throw ()
 {
@@ -48,14 +48,14 @@ std::string printNFA (const NFA_conv& nfa)
 	    ss << "initial ";
 	if (nfa.final.find(st) != nfa.final.end())
 	    ss << "final ";
-	ss << "state " << join_seq(std::string("-"),st) << " {" << std::endl;
+	ss << "state " << join_seq(std::string("-"),st) 
+	   << " {" << std::endl;
 	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
 	     sdi != dmi->second.end();
 	     ++sdi) {
-	    ss << sdi->first << " -> { ";
-	    std::copy(sdi->second.begin(), sdi->second.end(),
-		      std::ostream_iterator<StateT >(ss," "));
-	    ss << "}" << std::endl;
+	    ss << sdi->first << " -> { " 
+	       << join_seq(std::string("-"),sdi->second)
+	       << " }" << std::endl;
 	}
 	ss << "}" << std::endl;
     }
@@ -99,14 +99,12 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 	/* (a) We will determine delta'(q',a) = union(delta(p,a)) for
 	   p element q' and for all a element T. */
 	StateDeltaT stdelta;
-	int cnt = 0;
 	for (std::set<LetterT >::const_iterator letter = alphabet.begin();
 	     letter != alphabet.end();
 	     ++letter) {
 	    /* alokace promenne pro sjednoceni union(delta(p,a)) 
 	       for p element q' */
 	    SetOfStatesT* un = new SetOfStatesT;
-	    int cnt2 = 0;
 	    for (SetOfStatesT::const_iterator p = q_.begin();
 		 p != q_.end();
 		 ++p) {
@@ -125,6 +123,7 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 		    continue;
 		un->insert(sdi->second.begin(), sdi->second.end());
 	    }
+	    /* Nevkladej prazdne stavy. */
 	    if (un->empty())
 		continue;
 	    stdelta.insert(make_pair(*letter,*un));
@@ -143,7 +142,6 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 	nfa_conv.delta.insert(make_pair(q_,stdelta));
     }
     
-    nfa_conv.name = nfa.name;
     /* 4. q0' = {q0}. */
     nfa_conv.initial = q0set;
     /* 5. F' = {q' : q' element Q', q' intersection F != 0}. */
@@ -159,11 +157,63 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 	if (! inter.empty())
 	    nfa_conv.final.insert(*q_);
     }
+    nfa_conv.name = nfa.name;
     
     return nfa_conv;
 }
 
-NFA fix_converted (const NFA_conv& nfa_conv, bool )
+static void next_name (std::string& s)
 {
-    
+    if (s[s.length()-1] == 'Z') {
+	s += 'A';
+    }
+    else {
+	s[s.length()-1] += 1;
+    }
 }
+
+NFA fix_converted (const NFA_conv& nfa_conv, bool rename)
+{
+    NFA nfa;
+    std::string stname("A");
+    std::map<SetOfStatesT, StateT > table;
+    std::map<SetOfStatesT, StateDeltaT >::const_iterator dmi;
+
+    /* Vytvor prevodni tabulku jmen stavu. */
+    for (dmi = nfa_conv.delta.begin();
+	 dmi != nfa_conv.delta.end();
+	 ++dmi) {
+	if (rename) {
+	    table.insert(make_pair(dmi->first, stname));
+	    next_name(stname); 
+	}
+	else 
+	    table.insert(make_pair(dmi->first, 
+				   join_seq(std::string("-"),
+					    dmi->first)));
+    }
+    
+    for (dmi = nfa_conv.delta.begin();
+	 dmi != nfa_conv.delta.end();
+	 ++dmi) {
+	StateDeltaT sd;
+	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
+	     sdi != dmi->second.end();
+	     ++sdi) {
+	    SetOfStatesT s;
+	    s.insert(table.find(sdi->second)->second);
+	    sd.insert(make_pair(sdi->first,s));
+	}
+	nfa.delta.insert(make_pair(table.find(dmi->first)->second,sd));
+    }
+    
+    nfa.name = nfa_conv.name;
+    nfa.initial = table.find(nfa_conv.initial)->second;
+    for (std::set<SetOfStatesT >::const_iterator si = nfa_conv.final.begin();
+	 si != nfa_conv.final.end();
+	 ++si)
+	nfa.final.insert(table.find(*si)->second);
+    
+    return nfa;
+}
+

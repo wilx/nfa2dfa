@@ -6,7 +6,6 @@
 #include <map>
 #include <utility>
 #include <sstream>
-#include <iterator>
 #include <exception>
 
 typedef std::string StateT;
@@ -63,6 +62,6 @@ std::string printNFA (const NFA& nfa);
 std::string printNFA (const NFA_conv& nfa);
 std::set<LetterT > input_alphabet (const NFA& nfa);
 NFA_conv convert_NFA2DFA (const NFA& nfa);
-NFA fix_converted (const NFA_conv& nfa_conv);
+NFA fix_converted (const NFA_conv& nfa_conv, bool rename = false);
 
 #endif
