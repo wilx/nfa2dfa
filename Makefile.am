@@ -1,3 +1,4 @@
+CXXFLAGS = @CXXFLAGS@ -W -Wall -Wno-unused -pedantic
 bin_PROGRAMS = nfa2dfa
 nfa2dfa_SOURCES = nfa2dfa.cc nfa.cxx nfa.hxx parser.cxx parser.hxx \
 	lexer.cxx

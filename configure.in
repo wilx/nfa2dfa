@@ -6,5 +6,7 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AM_PROG_LEX
 AC_PROG_YACC
+AC_CHECK_HEADER(popt.h,,[AC_MSG_ERROR([popt.h not found])])
+AC_CHECK_LIB(popt,poptGetContext,,[AC_MSG_ERROR([libpopt not found])])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

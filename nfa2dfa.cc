@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <algorithm>
 #include <iterator>
@@ -7,27 +8,83 @@
 #include <string>
 #include <cstdlib>
 #include <exception>
+#include <popt.h>
 #include "nfa.hxx"
 
 extern int yyparse (void*);
 extern FILE* yyin;
-
 extern char* filename;
 
-int main(int argc, char* argv[])
+#define OPT_CONVERT 0
+#define OPT_RENAME 1
+#define OPT_DOT 2
+#define OPT_NOTHING 3
+#define OPT_INFILE 4
+#define OPT_OUTFILE 5
+#define OPT_COUNT OPT_OUTFILE+1
+
+union optionValue {
+    char* str;
+    int val;
+};
+
+optionValue options[OPT_COUNT];
+poptOption optionsDesc[] = {
+    {"convert",'c',POPT_ARG_NONE,&options[OPT_CONVERT],1,
+     "convert NFA to DFA",NULL},
+    {"rename",'r',POPT_ARG_NONE,&options[OPT_RENAME],1,
+     "rename states after conversion",NULL},
+    {"dot",'d',POPT_ARG_NONE,&options[OPT_DOT],1,
+     "generate dot graph description",NULL},
+    {"do-nothing",'n',POPT_ARG_NONE,&options[OPT_NOTHING],1,
+     "do nothing, just print input to output",NULL},
+    {"input",'i',POPT_ARG_STRING,&options[OPT_INFILE],1,
+     "name of input file",NULL},
+    {"output",'o',POPT_ARG_STRING,&options[OPT_OUTFILE],1,
+     "name of output file",NULL},
+    POPT_AUTOHELP
+    POPT_TABLEEND
+};
+
+int main(int argc, const char* argv[])
 {
     try {
+	/* Analyzuj prikazovou radku pro paramatry. */
+	poptContext context = poptGetContext(NULL, argc, argv, optionsDesc,0);
+	int rc;
+	while ((rc = poptGetNextOpt(context)) > 0);
+	if (rc < -1) {
+	    std::cerr << poptStrerror(rc) << std::endl;
+	    poptPrintHelp(context, stderr, 0);
+	    exit(EXIT_FAILURE);
+	}
+	
 	/* Osetreni parametru vstupniho souboru */
-	if (argc == 2) {
-	    if (!(yyin = fopen(argv[1],"r"))) {
+	if (options[OPT_INFILE].str != NULL) {
+	    if (!(yyin = fopen(options[OPT_INFILE].str,"r"))) {
 		perror("chyba fopen()");
 		exit(EXIT_FAILURE);
 	    }
-	    filename = argv[1];
+	    filename = options[OPT_INFILE].str;
 	}
 	else {
 	    yyin = stdin;
 	    filename = "<stdin>";
+	}
+	
+	/* Osetreni parametru vystupniho souboru */
+	std::ofstream outfile;
+	std::ostream* os = NULL;
+	if (options[OPT_OUTFILE].str != NULL) {
+	    outfile.open(options[OPT_OUTFILE].str);
+	    if (!os) {
+		std::cerr << "chyba pri otevirani vystupniho souboru" 
+			  << std::endl;
+	    }
+	    os = &outfile;
+	}
+	else {
+	    os = &std::cout;
 	}
  
 	NFA nfa;
@@ -37,35 +94,39 @@ int main(int argc, char* argv[])
 	    std::cerr << "chyba pri parsovani vstupu" << std::endl;
 	    exit(EXIT_FAILURE);
 	}
-	/* Ladici vypis vstupniho automatu. */
-	std::cout << "input:" << std::endl << printNFA(nfa) << std::endl;
 
-	try { 
+	if (options[OPT_NOTHING].val) {
+	    *os << printNFA(nfa);
+	    exit(EXIT_SUCCESS);
+	}
+	
+	if (options[OPT_CONVERT].val) {
 	    nfa_conv = convert_NFA2DFA(nfa);
+	    nfa = fix_converted(nfa_conv);
 	}
-	catch (state_not_found& e) {
-	    std::cerr << "chyba pri prevodu v convert_NFA2DFA(): " 
-		      << e.what() << std::endl;
-	    std::cerr << "zobrazeni delta na neznamy stav" << std::endl;
-	    exit(EXIT_FAILURE);
+       
+	if (options[OPT_RENAME].val) {
+	    rename_states(nfa);
 	}
-
-	/* Ladici vypis prevedeneho automatu */
-	std::cout << "converted:" << std::endl << printNFA(nfa_conv) 
-		  << std::endl;
-	/* Ladici vypis prevedeneho a upraveneho automatu */
-	std::cout << "converted fixed:" << std::endl 
-		  << printNFA(fix_converted(nfa_conv,true)) << std::endl;
-	/* simplify(nfa);
-	   std::cout << "simplifed: " << printNFA(nfa) << std::endl; */
-	std::cout << "dot:" <<std::endl
-		  << printNFA2dot(fix_converted(nfa_conv)) << std::endl;
+	
+	if (options[OPT_DOT].val)
+	    *os << printNFA2dot(nfa);
+	else
+	    *os << printNFA(nfa);
+    }
+    catch (state_not_found& e) {
+	std::cerr << "chyba pri prevodu v convert_NFA2DFA(): " 
+		  << e.what() << std::endl;
+	std::cerr << "zobrazeni delta na neznamy stav" << std::endl;
+	exit(EXIT_FAILURE);
     }
     catch (std::exception& e) {
 	std::cerr << "vyjimka: " << e.what() << std::endl;
+	exit(EXIT_FAILURE);
     }
     catch (...) {
 	std::cerr << "nastala neznama vyjimka" << std::endl;
+	exit(EXIT_FAILURE);
     }
 
     exit(EXIT_SUCCESS);

@@ -65,6 +65,7 @@ std::string printNFA2dot (const NFA& nfa);
 std::set<LetterT > input_alphabet (const NFA& nfa);
 NFA_conv convert_NFA2DFA (const NFA& nfa);
 NFA fix_converted (const NFA_conv& nfa_conv, bool rename = false);
+NFA& rename_states(NFA& nfa);
 void simplify (NFA& nfa);
 
 #endif

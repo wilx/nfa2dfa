@@ -73,8 +73,6 @@ std::string printNFA2dot (const NFA& nfa)
     
     ss << "digraph \"" << nfa.name << "\" {" << std::endl;
     ss << "node [ shape = doublecircle ]; ";
-    /*std::copy(nfa.final.begin(), nfa.final.end(), 
-      std::ostream_iterator<StateT >(ss, " "));*/
     ss << "{ \"" << join_seq(std::string("\" \""), nfa.final) << "\" }";
     ss << ";" << std::endl;
     ss << "node [ shape = Mcircle ]; \"" << nfa.initial << "\";" << std::endl;
@@ -83,14 +81,9 @@ std::string printNFA2dot (const NFA& nfa)
     for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
 	 dmi != nfa.delta.end();
 	 ++dmi) {
-	const StateT& st = dmi->first;
-	/*if (st == nfa.initial)
-	  continue;*/
 	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
 	     sdi != dmi->second.end();
 	     ++sdi) {
-	    /*std::copy(sdi->second.begin(), sdi->second.end(),
-	      std::ostream_iterator<StateT >(ss, " "));*/
 	    ss << "\"" << dmi->first << "\" -> { ";
 	    ss << "\"" << join_seq(std::string("\" \""), sdi->second) << "\"";
 	    ss << " } [ label = \"" << sdi->first << "\" ];" << std::endl;
@@ -201,12 +194,64 @@ NFA_conv convert_NFA2DFA (const NFA& nfa)
 
 static void next_name (std::string& s)
 {
-    if (s[s.length()-1] == 'Z') {
-	s += 'A';
+    unsigned long x = 0;
+    const unsigned rng  = 'Z' - 'A' + 1;
+    for (std::string::const_iterator ch = s.begin();
+	 ch != s.end();
+	 ++ch)
+	x = x*rng + (unsigned)(*ch);
+    ++x;
+    s.erase(s.begin(), s.end());
+    while (x != 0) {
+	s.insert(s.begin(),(char)(x % rng));
+	x /= rng;
     }
-    else {
-	s[s.length()-1] += 1;
+}
+
+NFA& rename_states(NFA& nfa)
+{
+    std::string stname("A");
+    std::map<StateT, StateT > table;
+    DeltaMappingT::const_iterator dmi;
+
+    /* Vytvor prevodni tabulku jmen stavu. */
+    for (dmi = nfa.delta.begin();
+	 dmi != nfa.delta.end();
+	 ++dmi) {
+	table.insert(make_pair(dmi->first, stname));
+	next_name(stname); 
     }
+
+    /* Proved prejmenovani */
+    DeltaMappingT newdelta;
+    for (dmi = nfa.delta.begin();
+	 dmi != nfa.delta.end();
+	 ++dmi) {
+	StateDeltaT sd;
+	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
+	     sdi != dmi->second.end();
+	     ++sdi) {
+	    SetOfStatesT s;
+	    for (SetOfStatesT::const_iterator si = sdi->second.begin();
+		 si != sdi->second.end();
+		 ++si)
+		s.insert(table.find(*si)->second);
+	    sd.insert(make_pair(sdi->first, s));
+	}
+	newdelta.insert(make_pair(table.find(dmi->first)->second, sd));
+    }
+    nfa.delta = newdelta;
+    
+    /* Prejmenovani pocatecniho a konecnych stavu. */
+    nfa.initial = table.find(nfa.initial)->second;
+    SetOfStatesT sos;
+    for (SetOfStatesT::const_iterator si = nfa.final.begin();
+	 si != nfa.final.end();
+	 ++si)
+	sos.insert(table.find(*si)->second);
+    nfa.final = sos;
+    
+    return nfa;
 }
 
 NFA fix_converted (const NFA_conv& nfa_conv, bool rename)
@@ -230,6 +275,7 @@ NFA fix_converted (const NFA_conv& nfa_conv, bool rename)
 					    dmi->first)));
     }
     
+    /* Vytvoreni noveho zobrazeni delta. */
     for (dmi = nfa_conv.delta.begin();
 	 dmi != nfa_conv.delta.end();
 	 ++dmi) {
@@ -239,11 +285,12 @@ NFA fix_converted (const NFA_conv& nfa_conv, bool rename)
 	     ++sdi) {
 	    SetOfStatesT s;
 	    s.insert(table.find(sdi->second)->second);
-	    sd.insert(make_pair(sdi->first,s));
+	    sd.insert(make_pair(sdi->first, s));
 	}
-	nfa.delta.insert(make_pair(table.find(dmi->first)->second,sd));
+	nfa.delta.insert(make_pair(table.find(dmi->first)->second, sd));
     }
     
+    /* Prejmenovani pocatecniho a konecnych stavu */
     nfa.name = nfa_conv.name;
     nfa.initial = table.find(nfa_conv.initial)->second;
     for (std::set<SetOfStatesT >::const_iterator si = nfa_conv.final.begin();
