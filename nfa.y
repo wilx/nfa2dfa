@@ -22,7 +22,7 @@ StateDeltaT* sd;
 %token TOK_STATE, TOK_ID, TOK_ARROW, TOK_NAME, TOK_START, TOK_FINAL
 
 %type <sadp> state
-%type <sd> delta_list
+%type <sd> delta_list delta_list_final
 %type <lasosp> delta
 %type <sos> state_list
 %type <str> TOK_ID
@@ -55,11 +55,16 @@ state :
 | TOK_START TOK_STATE TOK_ID '{' delta_list '}' 
 				{ $$ = new StateAndDeltaPairT(*$3,*$5);
 				  ((NFA*)YYPARSE_PARAM)->initial = *$3; }
-| TOK_FINAL TOK_STATE TOK_ID '{' delta_list '}' 
+| TOK_FINAL TOK_STATE TOK_ID '{' delta_list_final '}' 
 				{ $$ = new StateAndDeltaPairT(*$3,*$5);
 				  ((NFA*)YYPARSE_PARAM)->final.insert(*$3); }
 | TOK_STATE TOK_ID '{' delta_list '}'
 				{ $$ = new StateAndDeltaPairT(*$2,*$4); }
+;
+
+delta_list_final : 
+  delta_list			{ $$ = $1; }
+| /* empty */			{ $$ = new StateDeltaT; }
 ;
 
 delta_list : 
