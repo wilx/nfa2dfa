@@ -1,5 +1,8 @@
 /* config.h.in.  Generated from configure.in by autoheader.  */
 
+/* Define if you have __gnu_cxx:select1st functor. */
+#undef HAVE_GNU_EXT_SELECT1ST
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -14,6 +17,9 @@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
+
+/* Define if you have std::select1st functor. */
+#undef HAVE_STD_SELECT1ST
 
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H

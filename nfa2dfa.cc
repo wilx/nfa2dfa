@@ -18,9 +18,10 @@ extern char* filename;
 #define OPT_CONVERT 0
 #define OPT_RENAME 1
 #define OPT_DOT 2
-#define OPT_NOTHING 3
-#define OPT_INFILE 4
-#define OPT_OUTFILE 5
+#define OPT_VCG 3
+#define OPT_NOTHING 4
+#define OPT_INFILE 5
+#define OPT_OUTFILE 6
 #define OPT_COUNT OPT_OUTFILE+1
 
 union optionValue {
@@ -36,6 +37,8 @@ poptOption optionsDesc[] = {
      "rename states after conversion",NULL},
     {"dot",'d',POPT_ARG_NONE,&options[OPT_DOT],1,
      "generate dot graph description",NULL},
+    {"vcg",'v',POPT_ARG_NONE,&options[OPT_VCG],1,
+     "generate VCG graph description",NULL},
     {"do-nothing",'n',POPT_ARG_NONE,&options[OPT_NOTHING],1,
      "do nothing, just print input to output",NULL},
     {"input",'i',POPT_ARG_STRING,&options[OPT_INFILE],1,
@@ -113,7 +116,10 @@ int main(int argc, const char* argv[])
 	if (options[OPT_DOT].val)
 	    *os << printNFA2dot(nfa);
 	else
-	    *os << printNFA(nfa);
+	    if (options[OPT_VCG].val)
+		*os << printNFA2vcg(nfa);
+	    else
+		*os << printNFA(nfa);
     }
     catch (state_not_found& e) {
 	std::cerr << "chyba pri prevodu v convert_NFA2DFA(): " 

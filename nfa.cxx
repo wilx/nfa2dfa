@@ -1,5 +1,12 @@
 #include "nfa.hxx"
 #include <iterator>
+#include <functional>
+#ifdef HAVE_STD_SELETCT1ST
+using std::select1st;
+#elif HAVE_GNU_EXT_SELECT1ST
+# include <ext/functional>
+using __gnu_cxx::select1st;
+#endif
 
 const char* state_not_found::what () const throw ()
 {
@@ -94,20 +101,69 @@ std::string printNFA2dot (const NFA& nfa)
     return ss.str();
 }
 
-/* Get set of input alphabet T from automaton's delta mapping. */
-std::set<LetterT > input_alphabet (const NFA& nfa)
+std::string printNFA2vcg (const NFA& nfa)
 {
-    std::set<LetterT> alphabet;
-    for (DeltaMappingT::const_iterator i = nfa.delta.begin();
-	 i != nfa.delta.end();
-	 ++i) {
-	for (StateDeltaT::const_iterator k = i->second.begin();
-	     k != i->second.end();
-	     ++k) {
-	    alphabet.insert(k->first);
+    std::ostringstream ss;
+    
+    ss << "graph: {" << std::endl;
+    ss << "title: \"" << nfa.name << "\"" << std::endl;
+    ss << "display_edge_labels: yes" << std::endl;
+    ss << "splines: yes" << std::endl;
+    for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
+	 dmi != nfa.delta.end();
+	 ++dmi) {
+	ss << "node: { title:\"" << dmi->first << "\" shape: ";
+	if (dmi->first == nfa.initial)
+	    ss << "rhomb ";
+	else
+	    ss << "ellipse ";
+	if (nfa.final.find(dmi->first) != nfa.final.end())
+	    ss << "color: lightred ";
+	ss << "}" << std::endl;
+    }
+    for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
+	 dmi != nfa.delta.end();
+	 ++dmi) {
+	for (StateDeltaT::const_iterator sdi = dmi->second.begin();
+	     sdi != dmi->second.end();
+	     ++sdi) {
+	    for (SetOfStatesT::const_iterator si = sdi->second.begin();
+		 si != sdi->second.end();
+		 ++si) {
+		ss << "edge: { sourcename:\"" << dmi->first << "\" "
+		   << "targetname:\"" << *si << "\" "
+		   << "label:\"" << sdi->first << "\" }" << std::endl;
+	    }
 	}
     }
-    return alphabet;
+    ss << "}" << std::endl;
+    return ss.str();
+ }
+
+ /* Get set of input alphabet T from automaton's delta mapping. */
+ std::set<LetterT > input_alphabet (const NFA& nfa)
+ {
+     std::set<LetterT> alphabet;
+     for (DeltaMappingT::const_iterator i = nfa.delta.begin();
+	  i != nfa.delta.end();
+	  ++i) {
+	 for (StateDeltaT::const_iterator k = i->second.begin();
+	      k != i->second.end();
+	      ++k) {
+	     alphabet.insert(k->first);
+	 }
+     }
+     return alphabet;
+ }
+
+ /* Get automaton's set of states G. */
+ SetOfStatesT automaton_states (const NFA& nfa)
+ {
+     SetOfStatesT sos;
+     std::transform(nfa.delta.begin(), nfa.delta.end(),
+		   std::insert_iterator<SetOfStatesT >(sos, sos.begin()),
+		   select1st<DeltaMappingT::value_type >());
+    return sos;
 }
 
 NFA_conv convert_NFA2DFA (const NFA& nfa)
