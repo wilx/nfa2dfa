@@ -5,7 +5,7 @@ CXX = c++
 #CXXFLAGS = -ggdb -W -Wall -Wno-unused -pedantic -O2 -march=athlon-tbird \
 #	-save-temps -fverbose-asm -fprefetch-loop-arrays -funroll-loops \
 #	-fomit-frame-pointer
-CXXFLAGS = -ggdb -W -Wall -Wno-unused -pedantic
+CXXFLAGS = -gdwarf2 -g3 -W -Wall -Wno-unused -pedantic
 EXE = .exe
 
 all : test nfa2dfa
