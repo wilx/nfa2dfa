@@ -17,7 +17,7 @@ lexer.o : lexer.cxx nfa.hxx parser.hxx
 lexer.cxx : nfa.lex
 	flex -d -B -8 -o$@ $<
 
-parser.o : parser.cxx nfa.hxx
+parser.o : parser.cxx parser.hxx nfa.hxx
 
 parser.cxx : nfa.y
 	bison -k -v -d -g -t -o$@ $<
