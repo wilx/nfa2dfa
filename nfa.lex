@@ -1,6 +1,5 @@
 %{
 #include <string>
-#include <iostream>
 #include "nfa.hxx"
 #include "parser.hxx"
 %}
