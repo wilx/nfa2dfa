@@ -18,7 +18,7 @@
 ->			{ return TOK_ARROW; }
 state			{ return TOK_STATE; }
 initial|start(ing)?	{ return TOK_START; }
-name			{ return TOK_NAME; }
+name|automaton		{ return TOK_NAME; }
 final|accepting		{ return TOK_FINAL; }
 ([[:alnum:]_-]|".")+	{ yylval.str = new std::string(yytext); 
 			  return TOK_ID; }
