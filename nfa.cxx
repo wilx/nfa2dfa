@@ -79,11 +79,12 @@ std::string printNFA2dot (const NFA& nfa)
     std::ostringstream ss;
     
     ss << "digraph \"" << nfa.name << "\" {" << std::endl;
-    ss << "node [ shape = doublecircle ]; ";
+    ss << "node [ shape = ellipse, color = red ]; ";
     ss << "{ \"" << join_seq(std::string("\" \""), nfa.final) << "\" }";
     ss << ";" << std::endl;
-    ss << "node [ shape = Mcircle ]; \"" << nfa.initial << "\";" << std::endl;
-    ss << "node [ shape = circle ];" << std::endl;
+    ss << "node [ shape = box, color = green ]; \"" 
+       << nfa.initial << "\";" << std::endl;
+    ss << "node [ shape = ellipse ];" << std::endl;
     ss << "rankdir = LR;" << std::endl;
     for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
 	 dmi != nfa.delta.end();
