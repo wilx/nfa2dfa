@@ -24,21 +24,15 @@ int main(int argc, char* argv[])
 	yyin = stdin;
  
     NFA nfa;
+    NFA_conv nfa_conv;
     int ret = yyparse((void*)&nfa);
-    std::cerr << "yyparse() == " << ret << std::endl;
     if (ret == 1) {
 	std::cerr << "chyba pri parsovani vstupu" << std::endl;
 	std::copy(qq.begin(),qq.end(),
 		  std::ostream_iterator<std::string >(std::cout," => "));
 	exit(EXIT_FAILURE);
     }
-
-    for (DeltaMappingT::const_iterator i = nfa.delta.begin();
-	 i != nfa.delta.end();
-	 ++i) {
-	std::cout << i->first << ", ";
-    }
-    std::cout << std::endl;
+    std::cout << printNFA(nfa) << std::endl;
     
     /* Get set of input alphabet T from automaton's delta mapping. */
     std::set<LetterT> alphabet;
@@ -54,8 +48,7 @@ int main(int argc, char* argv[])
 
     /* 1. The set Q' = {{q0}} will be defined, the state {q0} will be treated
        as unmarked. */
-    std::map<SetOfStatesT, std::map<LetterT, SetOfStatesT > > delta_;
-    std::set<SetOfStatesT > Qnew, marked, unmarked, Fnew;
+    std::set<SetOfStatesT > Qnew, unmarked;
     SetOfStatesT q0set;
     q0set.insert(nfa.initial);
     Qnew.insert(q0set);
@@ -104,12 +97,10 @@ int main(int argc, char* argv[])
 	    unmarked.erase(q_);
 	    /* (d) Continue with step (2). */
 	}
-	delta_.insert(make_pair(q_,stdelta));
+	nfa_conv.delta.insert(make_pair(q_,stdelta));
     }
     
-    NFA_conv nfa_conv;
     nfa_conv.name = nfa.name;
-    nfa_conv.delta = delta_;
     /* 4. q0' = {q0}. */
     nfa_conv.initial = q0set;
     /* 5. F' = {q' : q' element Q', q' intersection F != 0}. */
@@ -123,6 +114,8 @@ int main(int argc, char* argv[])
 			 std::insert_iterator<SetOfStatesT >(inter,
 							     inter.begin()));
 	if (! inter.empty())
-	    Fnew.insert(*q_);
+	    nfa_conv.final.insert(*q_);
     }
+ 
+    
 }
