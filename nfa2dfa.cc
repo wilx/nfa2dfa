@@ -96,7 +96,7 @@ int main(int argc, const char* argv[])
 	    nfa = fix_converted(nfa_conv);
 	}
 
-	simplify (nfa);
+	//simplify (nfa);
 
 	if (options[OPT_RENAME].val)
 	    rename_states(nfa);
