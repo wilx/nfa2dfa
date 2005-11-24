@@ -1,10 +1,9 @@
 #!/bin/sh
 
-libtoolize --force
-aclocal \
-&& autoheader \
+aclocal --force -I . \
+&& autoheader --force -I . \
 && automake --foreign --add-missing --copy \
-&& autoconf
+&& autoconf --force -I . 
 
 if test -x ./config.status; then 
     ./config.status --recheck

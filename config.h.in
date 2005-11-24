@@ -1,7 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
-
-/* Define to 1 if you have the <dlfcn.h> header file. */
-#undef HAVE_DLFCN_H
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* define if compiler has __gnu_cxx::select1st */
 #undef HAVE_GNU_EXT_SELECT1ST

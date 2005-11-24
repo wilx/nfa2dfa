@@ -21,7 +21,7 @@ StateAndDeltaPairT* sadp;
 StateDeltaT* sd;
 }
 
-%token TOK_STATE, TOK_ID, TOK_ARROW, TOK_NAME, TOK_START, TOK_FINAL
+%token TOK_STATE TOK_ID TOK_ARROW TOK_NAME TOK_START TOK_FINAL
 
 %type <sadp> state
 %type <sd> delta_list delta_list_final
