@@ -1,6 +1,6 @@
 AM_CXXFLAGS = @CXXFLAGS@ -W -Wall -pedantic
 bin_PROGRAMS = nfa2dfa
-nfa2dfa_SOURCES = nfa2dfa.cc nfa.cxx nfa.hxx parser.cxx parser.hxx
+nfa2dfa_SOURCES = nfa2dfa.cxx nfa.cxx nfa.hxx parser.cxx parser.hxx
 nfa2dfa_SOURCES += lexer.cxx missing.hxx
 nfa2dfa_LDADD = @LEXLIB@
 EXTRA_DIST = nfa.lex nfa.y tests/automaton*.txt tests/empty.txt

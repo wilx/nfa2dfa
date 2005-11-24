@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
-AC_INIT([nfa2dfa.cc])
-AM_INIT_AUTOMAKE([nfa2dfa], [0.1])
+AC_INIT([nfa2dfa.cxx])
+AM_INIT_AUTOMAKE([nfa2dfa], [0.2])
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET

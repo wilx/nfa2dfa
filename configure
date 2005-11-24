@@ -271,7 +271,7 @@ PACKAGE_VERSION=
 PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
-ac_unique_file="nfa2dfa.cc"
+ac_unique_file="nfa2dfa.cxx"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -1607,7 +1607,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=nfa2dfa
- VERSION=0.1
+ VERSION=0.2
 
 
 cat >>confdefs.h <<_ACEOF
