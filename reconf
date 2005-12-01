@@ -1,9 +1,14 @@
 #!/bin/sh
 
-aclocal --force -I . \
-&& autoheader --force -I . \
-&& automake --foreign --add-missing --copy \
-&& autoconf --force -I . 
+ACLOCAL=${ACLOCAL:-aclocal}
+AUTOMAKE=${AUTOMAKE:-automake}
+AUTOCONF=${AUTOCONF:-autoconf}
+AUTOHEADER=${AUTOHEADER:-autoheader}
+
+${ACLOCAL} --force -I . \
+&& ${AUTOHEADER} --force -I . \
+&& ${AUTOMAKE} --foreign --add-missing --copy \
+&& ${AUTOCONF} --force -I . 
 
 if test -x ./config.status; then 
     ./config.status --recheck
