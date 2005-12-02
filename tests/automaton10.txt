@@ -1,0 +1,26 @@
+# Automat s epsilon prechodem.
+# Faktorovy automat pro retezec "abbc".
+automaton Epsilon
+
+initial final state 0 
+{ 
+  a -> 1
+  '' -> {1 2 3 4}
+}
+
+final state 1
+{
+  b -> 2
+}
+
+final state 2
+{
+  b -> 3
+}
+
+final state 3
+{
+  c -> 4
+}
+
+final state 4 {}
