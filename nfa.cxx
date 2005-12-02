@@ -3,7 +3,7 @@
 #include <functional>
 #include <iostream>
 #include "missing.hxx"
-
+#include "join.hxx"
 
 const char *
 state_not_found::what () const throw ()
@@ -31,7 +31,7 @@ printNFA (const NFA& nfa)
            sdi != dmi->second.end();
            ++sdi)
         {
-          ss << sdi->first << " -> ";
+          ss << (sdi->first == "" ? "''" : sdi->first) << " -> ";
           if (sdi->second.size() > 1)
             ss << "{ ";
           std::copy(sdi->second.begin(), sdi->second.end(),
@@ -62,15 +62,13 @@ printNFA (const NFA_conv& nfa)
         ss << "initial ";
       if (nfa.final.find(st) != nfa.final.end())
         ss << "final ";
-      ss << "state " << join_seq(std::string("-"),st)
-         << " {" << std::endl;
+      ss << "state " << join_into_stream (st, "-") << " {" << std::endl;
       for (StateDeltaT::const_iterator sdi = dmi->second.begin();
            sdi != dmi->second.end();
            ++sdi)
         {
           ss << sdi->first << " -> "
-             << join_seq(std::string("-"),sdi->second)
-             << std::endl;
+             << join_into_stream (sdi->second, "-") << std::endl;
         }
       ss << "}" << std::endl;
     }
@@ -82,13 +80,18 @@ std::string
 printNFA2dot (const NFA& nfa)
 {
   std::ostringstream ss;
+  SetOfStatesT final_without_initial (nfa.final);
+  final_without_initial.erase (nfa.initial);
 
   ss << "digraph \"" << nfa.name << "\" {" << std::endl;
+  ss << "node [ shape = box" 
+     << (nfa.final.find (nfa.initial) != nfa.final.end () 
+         ? ", color = red "
+         : " ") << "]; "
+     << "\"" << nfa.initial << "\";" << std::endl;
   ss << "node [ shape = ellipse, color = red ]; ";
-  ss << "{ \"" << join_seq(std::string("\" \""), nfa.final) << "\" }";
+  ss << "{ \"" << join_into_stream (final_without_initial, "\" \"") << "\" }";
   ss << ";" << std::endl;
-  ss << "node [ shape = box, color = green ]; \""
-     << nfa.initial << "\";" << std::endl;
   ss << "node [ shape = ellipse, color = black ];" << std::endl;
   ss << "rankdir = LR;" << std::endl;
   for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
@@ -100,7 +103,7 @@ printNFA2dot (const NFA& nfa)
            ++sdi)
         {
           ss << "\"" << dmi->first << "\" -> { ";
-          ss << "\"" << join_seq(std::string("\" \""), sdi->second) << "\"";
+          ss << "\"" << join_into_stream (sdi->second, "\" \"") << "\"";
           ss << " } [ label = \"" << sdi->first << "\" ];" << std::endl;
         }
     }
@@ -118,6 +121,7 @@ printNFA2vcg (const NFA& nfa)
   ss << "title: \"" << nfa.name << "\"" << std::endl;
   ss << "display_edge_labels: yes" << std::endl;
   ss << "splines: yes" << std::endl;
+  ss << "orientation: left_to_right" << std::endl;
   for (DeltaMappingT::const_iterator dmi = nfa.delta.begin();
        dmi != nfa.delta.end();
        ++dmi)
@@ -391,6 +395,120 @@ fix_converted (const NFA_conv& nfa_conv, const bool rename)
 
   return nfa;
 }
+
+
+struct EpsilonClosureData
+{
+  EpsilonClosureData (SetOfStatesT & closure_ref)
+    : closure (closure_ref)
+  { }
+
+  SetOfStatesT visited;
+  SetOfStatesT & closure;
+};
+
+
+static
+void
+epsilon_closure (EpsilonClosureData & data, NFA const & nfa,
+                 StateT const & state)
+{
+  if (data.visited.find (state) != data.visited.end ())
+    return;
+
+  // Find the state and its delta mapping.
+  DeltaMappingT::const_iterator dmi = nfa.delta.find (state);
+  if (dmi == nfa.delta.end ())
+    throw state_not_found ();
+  // Find epsilon transition in the state.
+  StateDeltaT::const_iterator sdi = dmi->second.find ("");
+  if (sdi != dmi->second.end ())
+    {
+      // Add all targets of the epsilon transition into closure.
+      std::copy (sdi->second.begin (), sdi->second.end (),
+                 std::inserter (data.closure, data.closure.begin ()));
+      // Mark state as visited.
+      data.visited.insert (state);
+      // Try to recurse.
+      for (SetOfStatesT::const_iterator si = sdi->second.begin ();
+           si != sdi->second.end ();
+           ++si)
+        {
+          epsilon_closure (data, nfa, *si);
+        }
+    }
+}
+
+
+static
+void
+epsilon_closure (SetOfStatesT & closure, NFA const & nfa, StateT const & start)
+{
+  EpsilonClosureData data (closure);
+  data.closure.insert (start);
+  epsilon_closure (data, nfa, start);
+}
+
+
+static
+void
+copy_non_epsilon_transitions (StateDeltaT & dest, StateDeltaT const & src)
+{
+  for (StateDeltaT::const_iterator sdi = src.begin (); sdi != src.end ();
+       ++sdi)
+    {
+      if (sdi->first != "")
+        {
+          StateDeltaT::iterator dest_sdi = dest.find (sdi->first);
+          if (dest_sdi != dest.end ())
+            std::copy (sdi->second.begin (), sdi->second.end (),
+                       std::inserter (dest_sdi->second,
+                                      dest_sdi->second.begin ()));
+          else
+            dest.insert (*sdi);
+        }
+    }
+}
+
+
+void
+remove_epsilons (NFA & nfa)
+{
+  SetOfStatesT closure;
+  for (DeltaMappingT::iterator dmi = nfa.delta.begin ();
+       dmi != nfa.delta.end (); ++dmi)
+    {
+      StateDeltaT::const_iterator sdi = dmi->second.find ("");
+      if (sdi != dmi->second.end ())
+        {
+          // Make epsilon closure.
+          closure.clear ();
+          epsilon_closure (closure, nfa, dmi->first);
+          // Add transitions from source of epsilon transitions to states 
+          // accessible from destinations of the epsilon transitions... Huh.
+          for (SetOfStatesT::const_iterator si = closure.begin ();
+               si != closure.end (); ++si)
+            {
+              DeltaMappingT::iterator source_dmi = nfa.delta.find (*si);
+              if (source_dmi == nfa.delta.end ())
+                throw state_not_found ();
+
+              copy_non_epsilon_transitions (dmi->second, source_dmi->second);
+            }
+          dmi->second.erase (sdi->first);
+        }
+    }
+}
+
+
+NFA
+remove_epsilons (NFA const & nfa)
+{
+  NFA tmp (nfa);
+  remove_epsilons (nfa);
+  return tmp;
+}
+
 
 struct EqSetRep
 {
