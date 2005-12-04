@@ -84,8 +84,8 @@ printNFA2dot (const NFA& nfa)
   final_without_initial.erase (nfa.initial);
 
   ss << "digraph \"" << nfa.name << "\" {" << std::endl;
-  ss << "node [ shape = box" 
-     << (nfa.final.find (nfa.initial) != nfa.final.end () 
+  ss << "node [ shape = box"
+     << (nfa.final.find (nfa.initial) != nfa.final.end ()
          ? ", color = red "
          : " ") << "]; "
      << "\"" << nfa.initial << "\";" << std::endl;
@@ -484,7 +484,7 @@ remove_epsilons (NFA & nfa)
           // Make epsilon closure.
           closure.clear ();
           epsilon_closure (closure, nfa, dmi->first);
-          // Add transitions from source of epsilon transitions to states 
+          // Add transitions from source of epsilon transitions to states
           // accessible from destinations of the epsilon transitions... Huh.
           for (SetOfStatesT::const_iterator si = closure.begin ();
                si != closure.end (); ++si)
@@ -512,15 +512,13 @@ remove_epsilons (NFA const & nfa)
 
 struct EqSetRepKey
 {
-  //! State that represents all states with delta = stdelta.
-  //StateT rep;
   //! Delta mapping for this equivalency set.
   StateDeltaT stdelta;
   //! Flag for equivalency set that contains final states.
   bool final;
 
-  EqSetRepKey (/*const StateT& st,*/ StateDeltaT const & sd, bool f)
-    : /*rep(st),*/ stdelta (sd), final (f) 
+  EqSetRepKey (StateDeltaT const & sd, bool f)
+    : stdelta (sd), final (f)
   { }
   friend bool operator == (EqSetRepKey const & el1, EqSetRepKey const & el2);
   friend bool operator < (EqSetRepKey const & el1, EqSetRepKey const & el2);
@@ -529,29 +527,12 @@ struct EqSetRepKey
 void
 minimize (NFA & nfa)
 {
-  bool more;
-
-  do
+  while (1)
     {
-      more = false;
-
       //! Zobrazeni delta stavu -> reprezentant tridy ekvivalence.
       std::map<EqSetRepKey, StateT> eqset2rep;
       //! Zobrazeni stav -> reprezentant tridy ekvivalence stavu.
       std::map<StateT, StateT> substmap;
-
-      // Jako prvni vloz pocatecni stav.
-      {
-        const DeltaMappingT::const_iterator dmi
-          = nfa.delta.find (nfa.initial);
-        if (dmi == nfa.delta.end ())
-          throw state_not_found ();
-        eqset2rep.insert 
-          (std::make_pair 
-           (EqSetRepKey (dmi->second, 
-                         nfa.final.find (dmi->first) != nfa.final.end ()),
-            dmi->first));
-      }
 
       // Vytvor mnozinu reprezentantu jednotlivych trid ekvivalence
       // a take zobrazeni jednotlivych stavu na reprezentanta sve tridy.
@@ -560,16 +541,23 @@ minimize (NFA & nfa)
            ++dmi)
         {
           std::pair<std::map<EqSetRepKey, StateT>::iterator, bool> p
-            = eqset2rep.insert 
+            = eqset2rep.insert
             (std::make_pair
              (EqSetRepKey (dmi->second,
                            nfa.final.find (dmi->first) != nfa.final.end ()),
               dmi->first));
+
           // !p.second == true znamena, ze uz mame reprezentanta pro tento
           // stav a tak jen vlozime zaznam do tabulky substituci.
           if (! p.second)
             substmap.insert (std::make_pair (dmi->first, p.first->second));
         }
+
+      if (substmap.empty ())
+        break;
+
+      // Nove zobrazeni delta po jednom kole minimalizace.
+      DeltaMappingT new_delta;
 
       // Smaz eqvivalentni stavy a proved nahradu za reprezentanta tridy.
       for (DeltaMappingT::iterator dmi = nfa.delta.begin ();
@@ -577,53 +565,51 @@ minimize (NFA & nfa)
            ++dmi)
         {
           std::map<EqSetRepKey, StateT>::const_iterator ri
-            = eqset2rep.find 
+            = eqset2rep.find
             (EqSetRepKey (dmi->second,
                           nfa.final.find (dmi->first) != nfa.final.end ()));
-          // Pokud to neni reprezentant, tak ho smazem.
+          // Pokud to neni reprezentant, tak nic...
           if (ri->second != dmi->first)
-            {
-              nfa.delta.erase (dmi);
-              more = true;
-            }
+            nfa.final.erase (dmi->first);
           // Je to reprezentant, tak nahradime jeho vsechny cile prechodu
           // ostatnimy reprezentanty.
-          else 
+          else
             {
+              StateDeltaT new_sd;
+
               // Prochazej vsechny dvojice (pismeno, {mnozina nasledniku}).
               for (StateDeltaT::iterator sdi = dmi->second.begin ();
                    sdi != dmi->second.end ();
                    ++sdi)
                 {
+                  std::pair<StateDeltaT::iterator, bool> p
+                    = new_sd.insert (std::make_pair (sdi->first,
+                                                     SetOfStatesT ()));
+                  SetOfStatesT & target_states = p.first->second;
+
                   for (SetOfStatesT::iterator si = sdi->second.begin ();
-                       si != sdi->second.end (); /**/)
+                       si != sdi->second.end (); ++si)
                     {
-                      std::clog << "hledani nahrady pro stav " << *si
-                                << std::endl;
-                      std::clog << "substmap.size (): " << substmap.size()
-                                << std::endl;
                       std::map<StateT, StateT>::const_iterator const substi
                         = substmap.find (*si);
                       if (substi == substmap.end ())
-                          {
-                            std::clog << "nenalezena substituce pro `" << *si 
-                                      << "'." << std::endl;
-                            throw state_not_found ();
-                          }
-                      //const StateT subst(substmap.find (*si)->second);
-                      SetOfStatesT::const_iterator const tmp = si++;
-                      sdi->second.erase (tmp);
-                      sdi->second.insert (substi->second);
+                        // Pokud stav neni v substmap, pak je reprezentantem.
+                        target_states.insert (*si);
+                      else
+                        target_states.insert (substi->second);
                     }
                 }
+
+              // Vloz nove vytvorene zobrazeni aktualniho stavu.
+              new_delta.insert (std::make_pair (dmi->first, new_sd));
             }
         }
+      nfa.delta.swap (new_delta);
     }
-  while (more);
 }
 
 inline
-bool 
+bool
 operator < (EqSetRepKey const & el1, EqSetRepKey const & el2)
 {
   if (el1.stdelta < el2.stdelta)
@@ -636,7 +622,7 @@ operator < (EqSetRepKey const & el1, EqSetRepKey const & el2)
 }
 
 inline
-bool 
+bool
 operator == (EqSetRepKey const & el1, EqSetRepKey const & el2)
 {
   return el1.final == el2.final && el1.stdelta == el2.stdelta;
