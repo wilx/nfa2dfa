@@ -513,9 +513,9 @@ remove_epsilons (NFA const & nfa)
 struct EqSetRepKey
 {
   //! Delta mapping for this equivalency set.
-  StateDeltaT stdelta;
+  StateDeltaT const & stdelta;
   //! Flag for equivalency set that contains final states.
-  bool final;
+  bool const final;
 
   EqSetRepKey (StateDeltaT const & sd, bool f)
     : stdelta (sd), final (f)
@@ -524,15 +524,27 @@ struct EqSetRepKey
   friend bool operator < (EqSetRepKey const & el1, EqSetRepKey const & el2);
 };
 
+struct state_ptr_lt
+{
+  inline bool
+  operator () (StateT const * s1, StateT const * s2) const
+  {
+    return *s1 < *s2;
+  }
+};
+
 void
 minimize (NFA & nfa)
 {
   while (1)
     {
       //! Zobrazeni delta stavu -> reprezentant tridy ekvivalence.
-      std::map<EqSetRepKey, StateT> eqset2rep;
+      typedef std::map<EqSetRepKey, StateT const *> EqMapT;
+      EqMapT eqset2rep;
       //! Zobrazeni stav -> reprezentant tridy ekvivalence stavu.
-      std::map<StateT, StateT> substmap;
+      typedef std::map<StateT const *, StateT const *, state_ptr_lt>
+        SubstMapT;
+      SubstMapT substmap;
 
       // Vytvor mnozinu reprezentantu jednotlivych trid ekvivalence
       // a take zobrazeni jednotlivych stavu na reprezentanta sve tridy.
@@ -540,17 +552,17 @@ minimize (NFA & nfa)
            dmi != nfa.delta.end();
            ++dmi)
         {
-          std::pair<std::map<EqSetRepKey, StateT>::iterator, bool> p
+          std::pair<EqMapT::iterator, bool> p
             = eqset2rep.insert
             (std::make_pair
              (EqSetRepKey (dmi->second,
                            nfa.final.find (dmi->first) != nfa.final.end ()),
-              dmi->first));
+              &dmi->first));
 
           // !p.second == true znamena, ze uz mame reprezentanta pro tento
           // stav a tak jen vlozime zaznam do tabulky substituci.
           if (! p.second)
-            substmap.insert (std::make_pair (dmi->first, p.first->second));
+            substmap.insert (std::make_pair (&dmi->first, p.first->second));
         }
 
       if (substmap.empty ())
@@ -560,16 +572,16 @@ minimize (NFA & nfa)
       DeltaMappingT new_delta;
 
       // Smaz eqvivalentni stavy a proved nahradu za reprezentanta tridy.
-      for (DeltaMappingT::iterator dmi = nfa.delta.begin ();
+      for (DeltaMappingT::const_iterator dmi = nfa.delta.begin ();
            dmi != nfa.delta.end ();
            ++dmi)
         {
-          std::map<EqSetRepKey, StateT>::const_iterator ri
+          EqMapT::const_iterator ri
             = eqset2rep.find
             (EqSetRepKey (dmi->second,
                           nfa.final.find (dmi->first) != nfa.final.end ()));
-          // Pokud to neni reprezentant, tak nic...
-          if (ri->second != dmi->first)
+          // Pokud to neni reprezentant, tak ho preskocime.
+          if (*ri->second != dmi->first)
             nfa.final.erase (dmi->first);
           // Je to reprezentant, tak nahradime jeho vsechny cile prechodu
           // ostatnimy reprezentanty.
@@ -578,7 +590,7 @@ minimize (NFA & nfa)
               StateDeltaT new_sd;
 
               // Prochazej vsechny dvojice (pismeno, {mnozina nasledniku}).
-              for (StateDeltaT::iterator sdi = dmi->second.begin ();
+              for (StateDeltaT::const_iterator sdi = dmi->second.begin ();
                    sdi != dmi->second.end ();
                    ++sdi)
                 {
@@ -587,16 +599,16 @@ minimize (NFA & nfa)
                                                      SetOfStatesT ()));
                   SetOfStatesT & target_states = p.first->second;
 
-                  for (SetOfStatesT::iterator si = sdi->second.begin ();
+                  for (SetOfStatesT::const_iterator si = sdi->second.begin ();
                        si != sdi->second.end (); ++si)
                     {
-                      std::map<StateT, StateT>::const_iterator const substi
-                        = substmap.find (*si);
+                      SubstMapT::const_iterator const substi
+                        = substmap.find (&*si);
                       if (substi == substmap.end ())
                         // Pokud stav neni v substmap, pak je reprezentantem.
                         target_states.insert (*si);
                       else
-                        target_states.insert (substi->second);
+                        target_states.insert (*substi->second);
                     }
                 }
 
