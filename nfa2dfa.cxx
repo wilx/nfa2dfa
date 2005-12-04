@@ -20,12 +20,13 @@ extern char* filename;
 #define OPT_MINIMIZE 6
 #define OPT_COUNT (OPT_MINIMIZE+1)
 
-union optionValue {
+union optionValue
+{
   char* str;
   int val;
 };
 
-optionValue options[OPT_COUNT];
+optionValue options[OPT_COUNT] = {0};
 const poptOption optionsDesc[] = {
   {"rename", 'r', POPT_ARG_NONE, &options[OPT_RENAME], 1,
    "rename states", NULL},
@@ -40,72 +41,72 @@ const poptOption optionsDesc[] = {
   {"output", 'o', POPT_ARG_STRING, &options[OPT_OUTFILE], 1,
    "name of output file", "file name"},
   {"minimize", 'm', POPT_ARG_NONE, &options[OPT_MINIMIZE], 1,
-   "minimize states", NULL}, 
+   "minimize states", NULL},
   POPT_AUTOHELP
   {NULL, '\0', 0, 0, 0, NULL, NULL}
 };
 
-int 
+int
 main (int argc, const char* argv[])
 {
-  try 
+  try
     {
       /* Analyzuj prikazovou radku pro paramatry. */
       poptContext context = poptGetContext(NULL, argc, argv, optionsDesc,0);
       int rc;
       while ((rc = poptGetNextOpt(context)) > 0);
-      if (rc < -1) 
+      if (rc < -1)
         {
           std::cerr << poptStrerror(rc) << std::endl;
           poptPrintHelp(context, stderr, 0);
           exit(EXIT_FAILURE);
         }
-        
+
       /* Osetreni parametru vstupniho souboru */
-      if (options[OPT_INFILE].str != NULL) 
+      if (options[OPT_INFILE].str != NULL)
         {
-          if (!(yyin = fopen(options[OPT_INFILE].str,"r"))) 
+          if (!(yyin = fopen(options[OPT_INFILE].str,"r")))
             {
               perror("chyba fopen()");
               exit(EXIT_FAILURE);
             }
           filename = options[OPT_INFILE].str;
         }
-      else 
+      else
         {
           yyin = stdin;
           filename = "<stdin>";
         }
-        
+
       /* Osetreni parametru vystupniho souboru */
       std::ofstream outfile;
       std::ostream* os = NULL;
-      if (options[OPT_OUTFILE].str != NULL) 
+      if (options[OPT_OUTFILE].str != NULL)
         {
           outfile.open(options[OPT_OUTFILE].str);
-          if (!outfile) 
+          if (!outfile)
             {
-              std::cerr << "chyba pri otevirani vystupniho souboru" 
+              std::cerr << "chyba pri otevirani vystupniho souboru"
                         << std::endl;
               exit(EXIT_FAILURE);
             }
           os = &outfile;
         }
-      else 
+      else
         {
           os = &std::cout;
         }
- 
+
       NFA nfa;
       NFA_conv nfa_conv;
       int ret = yyparse((void*)&nfa);
-      if (ret == 1) 
+      if (ret == 1)
         {
           std::cerr << "chyba pri parsovani vstupu" << std::endl;
           exit(EXIT_FAILURE);
         }
 
-      if (! options[OPT_NOTHING].val) 
+      if (! options[OPT_NOTHING].val)
         {
           remove_epsilons (nfa);
           nfa_conv = convert_NFA2DFA(nfa);
@@ -120,30 +121,29 @@ main (int argc, const char* argv[])
 
       if (options[OPT_DOT].val)
         *os << printNFA2dot(nfa);
+      else if (options[OPT_VCG].val)
+        *os << printNFA2vcg(nfa);
       else
-        if (options[OPT_VCG].val)
-          *os << printNFA2vcg(nfa);
-        else
-          *os << printNFA(nfa);
+        *os << printNFA(nfa);
     }
-  catch (const state_not_found& e) 
+  catch (const state_not_found& e)
     {
-      std::cerr << "chyba pri prevodu v convert_NFA2DFA(): " 
+      std::cerr << "chyba pri prevodu v convert_NFA2DFA(): "
                 << e.what() << std::endl;
       std::cerr << "zobrazeni delta na neznamy stav" << std::endl;
       exit(EXIT_FAILURE);
     }
-  catch (const std::exception& e) 
+  catch (const std::exception& e)
     {
       std::cerr << "vyjimka: " << e.what() << std::endl;
       exit(EXIT_FAILURE);
     }
-  catch (const std::string& e) 
+  catch (const std::string& e)
     {
       std::cerr << "vyjimka: " << e << std::endl;
       exit(EXIT_FAILURE);
     }
-  catch (...) 
+  catch (...)
     {
       std::cerr << "nastala neznama vyjimka" << std::endl;
       exit(EXIT_FAILURE);
