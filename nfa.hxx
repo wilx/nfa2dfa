@@ -72,6 +72,6 @@ extern NFA fix_converted (const NFA_conv& nfa_conv, const bool rename = false);
 extern NFA& rename_states(NFA& nfa);
 extern void remove_epsilons (NFA &);
 extern NFA remove_epsilons (NFA const &);
-extern void simplify (NFA& nfa);
+extern void minimize (NFA& nfa);
 
 #endif

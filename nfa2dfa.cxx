@@ -17,7 +17,8 @@ extern char* filename;
 #define OPT_NOTHING 3
 #define OPT_INFILE 4
 #define OPT_OUTFILE 5
-#define OPT_COUNT (OPT_OUTFILE+1)
+#define OPT_MINIMIZE 6
+#define OPT_COUNT (OPT_MINIMIZE+1)
 
 union optionValue {
   char* str;
@@ -26,23 +27,26 @@ union optionValue {
 
 optionValue options[OPT_COUNT];
 const poptOption optionsDesc[] = {
-  {"rename",'r',POPT_ARG_NONE,&options[OPT_RENAME],1,
-   "rename states",NULL},
-  {"dot",'d',POPT_ARG_NONE,&options[OPT_DOT],1,
-   "generate dot graph description",NULL},
-  {"vcg",'v',POPT_ARG_NONE,&options[OPT_VCG],1,
-   "generate VCG graph description",NULL},
-  {"do-nothing",'n',POPT_ARG_NONE,&options[OPT_NOTHING],1,
-   "don't convert, just print input to output",NULL},
-  {"input",'i',POPT_ARG_STRING,&options[OPT_INFILE],1,
+  {"rename", 'r', POPT_ARG_NONE, &options[OPT_RENAME], 1,
+   "rename states", NULL},
+  {"dot", 'd', POPT_ARG_NONE, &options[OPT_DOT], 1,
+   "generate dot graph description", NULL},
+  {"vcg", 'v', POPT_ARG_NONE, &options[OPT_VCG], 1,
+   "generate VCG graph description", NULL},
+  {"do-nothing", 'n', POPT_ARG_NONE, &options[OPT_NOTHING], 1,
+   "don't convert, just print input to output", NULL},
+  {"input", 'i', POPT_ARG_STRING, &options[OPT_INFILE], 1,
    "name of input file","file name"},
-  {"output",'o',POPT_ARG_STRING,&options[OPT_OUTFILE],1,
-   "name of output file","file name"},
+  {"output", 'o', POPT_ARG_STRING, &options[OPT_OUTFILE], 1,
+   "name of output file", "file name"},
+  {"minimize", 'm', POPT_ARG_NONE, &options[OPT_MINIMIZE], 1,
+   "minimize states", NULL}, 
   POPT_AUTOHELP
   {NULL, '\0', 0, 0, 0, NULL, NULL}
 };
 
-int main(int argc, const char* argv[])
+int 
+main (int argc, const char* argv[])
 {
   try 
     {
@@ -101,13 +105,15 @@ int main(int argc, const char* argv[])
           exit(EXIT_FAILURE);
         }
 
-      if (! options[OPT_NOTHING].val) {
-        remove_epsilons (nfa);
-        nfa_conv = convert_NFA2DFA(nfa);
-        nfa = fix_converted(nfa_conv);
-      }
+      if (! options[OPT_NOTHING].val) 
+        {
+          remove_epsilons (nfa);
+          nfa_conv = convert_NFA2DFA(nfa);
+          nfa = fix_converted(nfa_conv);
+        }
 
-      //simplify (nfa);
+      if (options[OPT_MINIMIZE].val)
+        minimize (nfa);
 
       if (options[OPT_RENAME].val)
         rename_states(nfa);
