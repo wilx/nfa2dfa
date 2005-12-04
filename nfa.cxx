@@ -539,11 +539,11 @@ minimize (NFA & nfa)
   while (1)
     {
       //! Zobrazeni delta stavu -> reprezentant tridy ekvivalence.
-      typedef std::map<EqSetRepKey, StateT const *> EqMapT;
+      typedef std::map<EqSetRepKey, StateT const * const> EqMapT;
       EqMapT eqset2rep;
       //! Zobrazeni stav -> reprezentant tridy ekvivalence stavu.
-      typedef std::map<StateT const *, StateT const *, state_ptr_lt>
-        SubstMapT;
+      typedef std::map<StateT const * const, StateT const * const,
+        state_ptr_lt> SubstMapT;
       SubstMapT substmap;
 
       // Vytvor mnozinu reprezentantu jednotlivych trid ekvivalence
@@ -552,7 +552,7 @@ minimize (NFA & nfa)
            dmi != nfa.delta.end();
            ++dmi)
         {
-          std::pair<EqMapT::iterator, bool> p
+          std::pair<EqMapT::const_iterator, bool> p
             = eqset2rep.insert
             (std::make_pair
              (EqSetRepKey (dmi->second,
@@ -576,7 +576,7 @@ minimize (NFA & nfa)
            dmi != nfa.delta.end ();
            ++dmi)
         {
-          EqMapT::const_iterator ri
+          EqMapT::const_iterator const ri
             = eqset2rep.find
             (EqSetRepKey (dmi->second,
                           nfa.final.find (dmi->first) != nfa.final.end ()));
