@@ -520,7 +520,7 @@ struct EqSetRepKey
   EqSetRepKey (StateDeltaT const & sd, bool f)
     : stdelta (sd), final (f)
   { }
-  friend bool operator == (EqSetRepKey const & el1, EqSetRepKey const & el2);
+
   friend bool operator < (EqSetRepKey const & el1, EqSetRepKey const & el2);
 };
 
@@ -631,11 +631,4 @@ operator < (EqSetRepKey const & el1, EqSetRepKey const & el2)
       return el1.final < el2.final;
     else
       return false;
-}
-
-inline
-bool
-operator == (EqSetRepKey const & el1, EqSetRepKey const & el2)
-{
-  return el1.final == el2.final && el1.stdelta == el2.stdelta;
 }
