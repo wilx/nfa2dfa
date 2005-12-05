@@ -11,7 +11,7 @@ touch acinclude.m4
 
 ${ACLOCAL} --force -I . \
 && ${AUTOHEADER} --force -I . \
-&& ${AUTOMAKE} --foreign --add-missing --copy \
+&& ${AUTOMAKE} --add-missing --copy \
 && ${AUTOCONF} --force -I . 
 
 if test -x ./config.status; then 
