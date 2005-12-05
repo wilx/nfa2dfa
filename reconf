@@ -15,5 +15,6 @@ ${ACLOCAL} --force -I . \
 && ${AUTOCONF} --force -I . 
 
 if test -x ./config.status; then 
-    ./config.status --recheck
+    ./config.status --recheck \
+    && ./config.status
 fi
