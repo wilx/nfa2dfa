@@ -1,4 +1,4 @@
-AM_CXXFLAGS = @CXXFLAGS@ -W -Wall -pedantic
+AM_CXXFLAGS = @CXXFLAGS@ -W -Wall -pedantic -g
 bin_PROGRAMS = nfa2dfa
 nfa2dfa_SOURCES = nfa2dfa.cxx nfa.cxx nfa.hxx parser.cxx parser.hxx
 nfa2dfa_SOURCES += lexer.cxx missing.hxx

@@ -1,10 +1,15 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ([2.59])
 AC_INIT([nfa2dfa.cxx])
-AM_INIT_AUTOMAKE([nfa2dfa], [0.2])
+
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
+
+AM_INIT_AUTOMAKE([nfa2dfa], [0.3])
+
+CPPFLAGS=-I/usr/local/include
+LDFLAGS=-L/usr/local/lib
 AC_LANG([C++])
 AC_PROG_CXX
 AC_PROG_INSTALL

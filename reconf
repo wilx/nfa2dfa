@@ -5,6 +5,10 @@ AUTOMAKE=${AUTOMAKE:-automake}
 AUTOCONF=${AUTOCONF:-autoconf}
 AUTOHEADER=${AUTOHEADER:-autoheader}
 
+touch Makefile.am
+touch configure.ac
+touch acinclude.m4
+
 ${ACLOCAL} --force -I . \
 && ${AUTOHEADER} --force -I . \
 && ${AUTOMAKE} --foreign --add-missing --copy \
