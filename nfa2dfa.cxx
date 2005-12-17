@@ -26,7 +26,7 @@ union optionValue
   int val;
 };
 
-optionValue options[OPT_COUNT] = {0};
+optionValue options[OPT_COUNT] = {{0}};
 const poptOption optionsDesc[] = {
   {"rename", 'r', POPT_ARG_NONE, &options[OPT_RENAME], 1,
    "rename states", NULL},
