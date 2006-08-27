@@ -14,6 +14,12 @@ FIND_LIBRARY(
   PATHS ${POPT_LIBRARY_DIR} /usr/bin /usr/local/bin
 )
 
+FIND_LIBRARY(
+  FL_LIBRARY 
+  NAMES fl libfl
+  PATHS ${FL_LIBRARY_DIR} /usr/bin /usr/local/bin
+)
+
 ADD_CUSTOM_COMMAND(
     OUTPUT lexer.cxx lexer.hxx
     COMMAND flex
@@ -35,4 +41,4 @@ ADD_CUSTOM_COMMAND(
 INCLUDE_DIRECTORIES(${POPT_INCLUDE_DIR})
 ADD_EXECUTABLE(nfa2dfa nfa2dfa.cxx nfa.cxx lexer.cxx parser.cxx)
 
-TARGET_LINK_LIBRARIES(nfa2dfa ${POPT_LIBRARY} fl)
+TARGET_LINK_LIBRARIES(nfa2dfa ${POPT_LIBRARY} ${FL_LIBRARY})
