@@ -2,6 +2,9 @@ PROJECT (nfa2dfa)
 
 SET(CMAKE_VERBOSE_MAKEFILE on)
 
+FIND_PATH(POPT_INCLUDE_DIR NAMES popt.h /usr/include /usr/local/include)
+FIND_LIBRARY(POPT_LIBRARY NAMES popt libpopt /usr/bin /usr/local/bin)
+
 ADD_CUSTOM_COMMAND(
     OUTPUT lexer.cxx lexer.hxx
     COMMAND flex
@@ -20,6 +23,7 @@ ADD_CUSTOM_COMMAND(
     COMMENT "Generating parser using bison."
 )
 
+INCLUDE_DIRECTORIES(${POPT_INCLUDE_DIR})
 ADD_EXECUTABLE(nfa2dfa nfa2dfa.cxx nfa.cxx lexer.cxx parser.cxx)
 
-TARGET_LINK_LIBRARIES(nfa2dfa popt fl)
+TARGET_LINK_LIBRARIES(nfa2dfa ${POPT_LIBRARY} fl)
