@@ -11,13 +11,13 @@ FIND_PATH(
 FIND_LIBRARY(
   POPT_LIBRARY 
   NAMES popt libpopt 
-  PATHS ${POPT_LIBRARY_DIR} /usr/bin /usr/local/bin
+  PATHS ${POPT_LIBRARY_DIR} /usr/lib /usr/local/lib
 )
 
 FIND_LIBRARY(
   FL_LIBRARY 
   NAMES fl libfl
-  PATHS ${FL_LIBRARY_DIR} /usr/bin /usr/local/bin
+  PATHS ${FL_LIBRARY_DIR} /usr/lib /usr/local/lib
 )
 
 ADD_CUSTOM_COMMAND(
