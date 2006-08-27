@@ -2,8 +2,17 @@ PROJECT (nfa2dfa)
 
 SET(CMAKE_VERBOSE_MAKEFILE on)
 
-FIND_PATH(POPT_INCLUDE_DIR NAMES popt.h /usr/include /usr/local/include)
-FIND_LIBRARY(POPT_LIBRARY NAMES popt libpopt /usr/bin /usr/local/bin)
+FIND_PATH(
+  POPT_INCLUDE_DIR
+  NAMES popt.h
+  PATHS ${POPT_INCLUDE_DIR} /usr/include /usr/local/include
+)
+
+FIND_LIBRARY(
+  POPT_LIBRARY 
+  NAMES popt libpopt 
+  PATHS ${POPT_LIBRARY_DIR} /usr/bin /usr/local/bin
+)
 
 ADD_CUSTOM_COMMAND(
     OUTPUT lexer.cxx lexer.hxx
