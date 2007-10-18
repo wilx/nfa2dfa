@@ -5,19 +5,19 @@ SET(CMAKE_VERBOSE_MAKEFILE on)
 FIND_PATH(
   POPT_INCLUDE_DIR
   NAMES popt.h
-  PATHS ${POPT_INCLUDE_DIR} /usr/include /usr/local/include
+  PATHS $ENV{POPT_INCLUDE_DIR} /usr/include /usr/local/include
 )
 
 FIND_LIBRARY(
   POPT_LIBRARY 
   NAMES popt libpopt 
-  PATHS ${POPT_LIBRARY_DIR} /usr/lib /usr/local/lib
+  PATHS $ENV{POPT_LIBRARY_DIR} /usr/lib /usr/local/lib
 )
 
 FIND_LIBRARY(
   FL_LIBRARY 
   NAMES fl libfl
-  PATHS ${FL_LIBRARY_DIR} /usr/lib /usr/local/lib
+  PATHS $ENV{FL_LIBRARY_DIR} /usr/lib /usr/local/lib
 )
 
 ADD_CUSTOM_COMMAND(
