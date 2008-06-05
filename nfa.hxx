@@ -33,7 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>
 #include <sstream>
 #include <exception>
-#include "config.h"
 
 
 typedef std::string StateT;

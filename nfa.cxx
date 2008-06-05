@@ -217,7 +217,7 @@ automaton_states (const NFA& nfa)
   SetOfStatesT sos;
   std::transform(nfa.delta.begin(), nfa.delta.end(),
                  std::insert_iterator<SetOfStatesT >(sos, sos.begin()),
-                 select1st<DeltaMappingT::value_type >());
+                 detail::select1st<DeltaMappingT::value_type >());
   return sos;
 }
 
