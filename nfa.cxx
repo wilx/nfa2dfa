@@ -31,11 +31,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "missing.hxx"
 #include "join.hxx"
 
+
 const char *
 state_not_found::what () const throw ()
 {
   return "state not found in delta mapping";
 }
+
 
 std::string
 printNFA (const NFA& nfa)
@@ -72,6 +74,7 @@ printNFA (const NFA& nfa)
   return ss.str();
 }
 
+
 std::string
 printNFA (const NFA_conv& nfa)
 {
@@ -101,6 +104,7 @@ printNFA (const NFA_conv& nfa)
 
   return ss.str();
 }
+
 
 std::string
 printNFA2dot (const NFA& nfa)
@@ -137,6 +141,7 @@ printNFA2dot (const NFA& nfa)
 
   return ss.str();
 }
+
 
 std::string
 printNFA2vcg (const NFA& nfa)
@@ -184,6 +189,7 @@ printNFA2vcg (const NFA& nfa)
   return ss.str();
 }
 
+
 /* Get set of input alphabet T from automaton's delta mapping. */
 std::set<LetterT >
 input_alphabet (const NFA& nfa)
@@ -203,6 +209,7 @@ input_alphabet (const NFA& nfa)
   return alphabet;
 }
 
+
 /* Get automaton's set of states G. */
 SetOfStatesT
 automaton_states (const NFA& nfa)
@@ -213,6 +220,7 @@ automaton_states (const NFA& nfa)
                  select1st<DeltaMappingT::value_type >());
   return sos;
 }
+
 
 NFA_conv
 convert_NFA2DFA (const NFA& nfa)
@@ -301,6 +309,7 @@ convert_NFA2DFA (const NFA& nfa)
   return nfa_conv;
 }
 
+
 static
 void
 next_name (std::string& s)
@@ -319,6 +328,7 @@ next_name (std::string& s)
       x /= rng;
     }
 }
+
 
 NFA &
 rename_states(NFA& nfa)
@@ -369,6 +379,7 @@ rename_states(NFA& nfa)
 
   return nfa;
 }
+
 
 NFA
 fix_converted (const NFA_conv& nfa_conv, const bool rename)
