@@ -434,6 +434,9 @@ fix_converted (const NFA_conv& nfa_conv, const bool rename)
 }
 
 
+namespace
+{
+
 struct EpsilonClosureData
 {
   EpsilonClosureData (SetOfStatesT & closure_ref)
@@ -443,6 +446,8 @@ struct EpsilonClosureData
   SetOfStatesT visited;
   SetOfStatesT & closure;
 };
+
+}
 
 
 static
@@ -547,6 +552,9 @@ remove_epsilons (NFA const & nfa)
 }
 
 
+namespace 
+{
+
 struct EqSetRepKey
 {
   //! Delta mapping for this equivalency set.
@@ -557,9 +565,22 @@ struct EqSetRepKey
   EqSetRepKey (StateDeltaT const & sd, bool f)
     : stdelta (sd), final (f)
   { }
-
-  friend bool operator < (EqSetRepKey const & el1, EqSetRepKey const & el2);
 };
+
+
+inline
+bool
+operator < (EqSetRepKey const & el1, EqSetRepKey const & el2)
+{
+  if (el1.stdelta < el2.stdelta)
+    return true;
+  else
+    if (el1.stdelta == el2.stdelta)
+      return el1.final < el2.final;
+    else
+      return false;
+}
+
 
 struct state_ptr_lt
 {
@@ -569,6 +590,9 @@ struct state_ptr_lt
     return *s1 < *s2;
   }
 };
+
+}
+
 
 void
 minimize (NFA & nfa)
@@ -655,17 +679,4 @@ minimize (NFA & nfa)
         }
       nfa.delta.swap (new_delta);
     }
-}
-
-inline
-bool
-operator < (EqSetRepKey const & el1, EqSetRepKey const & el2)
-{
-  if (el1.stdelta < el2.stdelta)
-    return true;
-  else
-    if (el1.stdelta == el2.stdelta)
-      return el1.final < el2.final;
-    else
-      return false;
 }
