@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2002-2007, Václav Haisman
+Copyright (c) 2002-2011, Václav Haisman
 
 All rights reserved.
 
@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iterator>
 #include <functional>
 #include <iostream>
+#include <algorithm>
 #include "missing.hxx"
 #include "join.hxx"
 
